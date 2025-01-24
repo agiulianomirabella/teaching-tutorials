@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Feature Extraction and Image Descriptors">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Feature Extraction and Image Descriptors</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Feature Extraction and Image Descriptors</h1>
+        <p>Understanding key techniques for image feature representation</p>
+    </header>
+
+    <div class="container">
+        <h2>What is Feature Extraction?</h2>
+        <p>Feature extraction is the process of identifying and representing significant patterns or characteristics in an image that are useful for further analysis, such as classification, object recognition, and image retrieval.</p>
+
+        <h2>Importance of Feature Extraction</h2>
+        <p>Feature extraction is crucial in computer vision because it:</p>
+        <ul>
+            <li><strong>Reduces Data Complexity:</strong> By focusing on important image aspects.</li>
+            <li><strong>Improves Performance:</strong> Helps machine learning models achieve better accuracy.</li>
+            <li><strong>Facilitates Comparisons:</strong> Enables matching of objects across images.</li>
+        </ul>
+
+        <h2>Types of Features</h2>
+        <p>Features in an image can be categorized into:</p>
+        <ul>
+            <li><strong>Global Features:</strong> Represent the entire image (e.g., color histograms, texture statistics).</li>
+            <li><strong>Local Features:</strong> Represent specific regions or points in the image (e.g., keypoints, edges).</li>
+        </ul>
+
+        <h2>Common Feature Extraction Techniques</h2>
+        
+        <h3>1. Edge Detection</h3>
+        <p>Edge detection identifies the boundaries of objects within an image by detecting intensity changes.</p>
+        <ul>
+            <li><strong>Sobel Operator:</strong> Computes gradient magnitude and direction.</li>
+            <li><strong>Canny Edge Detector:</strong> A multi-step approach to detect strong and weak edges.</li>
+        </ul>
+        <pre>
+import cv2
+
+# Load image
+image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Apply Canny edge detection
+edges = cv2.Canny(image, 50, 150)
+cv2.imwrite('edges.jpg', edges)
+        </pre>
+
+        <h3>2. Texture Analysis</h3>
+        <p>Texture features capture the structural patterns in an image.</p>
+        <ul>
+            <li><strong>Gray Level Co-occurrence Matrix (GLCM):</strong> Measures spatial relationships of pixel intensities.</li>
+            <li><strong>Local Binary Patterns (LBP):</strong> Encodes texture based on neighborhood pixel intensity differences.</li>
+        </ul>
+        <pre>
+from skimage.feature import graycomatrix, graycoprops
+
+# Compute GLCM
+glcm = graycomatrix(image, [1], [0], 256, symmetric=True, normed=True)
+contrast = graycoprops(glcm, 'contrast')[0, 0]
+print("Contrast:", contrast)
+        </pre>
+
+        <h3>3. Shape Descriptors</h3>
+        <p>Shape features provide information about the geometry of objects in an image.</p>
+        <ul>
+            <li><strong>Contours:</strong> Extract object boundaries.</li>
+            <li><strong>Hu Moments:</strong> Used for shape recognition.</li>
+        </ul>
+        <pre>
+# Find contours
+contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cv2.drawContours(image, contours, -1, (0,255,0), 2)
+cv2.imwrite('contours.jpg', image)
+        </pre>
+
+        <h3>4. Keypoint Detection and Matching</h3>
+        <p>Keypoints are distinctive image points useful for matching and tracking objects across images.</p>
+        <ul>
+            <li><strong>SIFT (Scale-Invariant Feature Transform):</strong> Detects and describes keypoints.</li>
+            <li><strong>SURF (Speeded-Up Robust Features):</strong> Faster version of SIFT.</li>
+            <li><strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Efficient and fast keypoint detector.</li>
+        </ul>
+        <pre>
+# ORB keypoint detection
+orb = cv2.ORB_create()
+keypoints, descriptors = orb.detectAndCompute(image, None)
+output = cv2.drawKeypoints(image, keypoints, None)
+cv2.imwrite('keypoints.jpg', output)
+        </pre>
+
+        <h3>5. Color Descriptors</h3>
+        <p>Color-based features are widely used in content-based image retrieval (CBIR) applications.</p>
+        <ul>
+            <li><strong>Color Histograms:</strong> Represent the distribution of colors in an image.</li>
+            <li><strong>Color Moments:</strong> Statistical moments used to describe color distribution.</li>
+        </ul>
+        <pre>
+# Compute color histogram
+hist = cv2.calcHist([image], [0], None, [256], [0,256])
+cv2.normalize(hist, hist)
+        </pre>
+
+        <h2>Applications of Feature Extraction</h2>
+        <ul>
+            <li><strong>Object Recognition:</strong> Identifying and classifying objects in images.</li>
+            <li><strong>Medical Imaging:</strong> Detecting abnormalities in radiological scans.</li>
+            <li><strong>Face Recognition:</strong> Extracting facial landmarks for identification.</li>
+            <li><strong>Image Retrieval:</strong> Searching databases using extracted features.</li>
+        </ul>
+
+        <h2>Challenges and Considerations</h2>
+        <p>Some challenges in feature extraction include:</p>
+        <ul>
+            <li>Handling variations in scale, rotation, and lighting conditions.</li>
+            <li>Choosing the right feature descriptors for specific tasks.</li>
+            <li>Balancing computational efficiency with accuracy.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://opencv.org/">OpenCV - Computer vision library</a></li>
+            <li><a href="https://scikit-image.org/">scikit-image - Image processing in Python</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Feature_extraction">Feature Extraction (Wikipedia)</a></li>
+            <li><a href="https://www.kaggle.com/datasets">Kaggle - Image Processing Datasets</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
