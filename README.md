@@ -1,2 +1,3 @@
-# tutorial-introduction-to-medical-imaging
-Introduction to Medical Imaging Tutorial
+# teaching-tutorials
+* Introduction to Medical Imaging
+* Image Representation and Fundamentals
