@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Image Registration and Alignment">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Image Registration and Alignment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Image Registration and Alignment</h1>
+        <p>Understanding the techniques and applications of image alignment</p>
+    </header>
+
+    <div class="container">
+        <h2>What is Image Registration?</h2>
+        <p>Image registration is the process of aligning multiple images of the same scene taken at different times, perspectives, or sensors. It is widely used in medical imaging, remote sensing, and computer vision to compare images effectively.</p>
+
+        <h2>Why is Image Registration Important?</h2>
+        <p>Image registration is crucial for:</p>
+        <ul>
+            <li><strong>Medical Imaging:</strong> Aligning images from different modalities (MRI, CT, PET) for diagnosis.</li>
+            <li><strong>Change Detection:</strong> Monitoring structural changes over time in remote sensing.</li>
+            <li><strong>Computer Vision:</strong> Stitching images in panoramic views and object tracking.</li>
+            <li><strong>Augmented Reality:</strong> Aligning virtual objects with real-world views.</li>
+        </ul>
+
+        <h2>Types of Image Registration</h2>
+        <p>There are various types of image registration methods based on transformation models:</p>
+        
+        <h3>1. Rigid Registration</h3>
+        <p>Rigid registration involves only rotation and translation, preserving the shape of objects.</p>
+        <ul>
+            <li>Used in brain imaging where anatomical structures remain unchanged.</li>
+            <li>Transformation: \( T(x) = Rx + t \)</li>
+        </ul>
+
+        <h3>2. Affine Registration</h3>
+        <p>Affine registration includes scaling, rotation, translation, and shearing, maintaining parallel lines but allowing changes in scale.</p>
+        <ul>
+            <li>Common in remote sensing and biomedical applications.</li>
+            <li>Transformation: \( T(x) = Ax + t \)</li>
+        </ul>
+
+        <h3>3. Non-Rigid (Deformable) Registration</h3>
+        <p>Non-rigid registration allows local deformations to align flexible objects.</p>
+        <ul>
+            <li>Used in applications like organ deformation tracking in medical imaging.</li>
+            <li>Transformation: Complex functions or splines.</li>
+        </ul>
+
+        <h2>Image Registration Techniques</h2>
+        <p>The commonly used techniques for image registration include:</p>
+
+        <h3>1. Feature-Based Registration</h3>
+        <p>Identifies key points (e.g., corners, edges) and matches them between images.</p>
+        <ul>
+            <li><strong>Scale-Invariant Feature Transform (SIFT):</strong> Detects and describes keypoints invariant to scale and rotation.</li>
+            <li><strong>Speeded-Up Robust Features (SURF):</strong> Faster alternative to SIFT with similar robustness.</li>
+            <li><strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Efficient keypoint detection and matching.</li>
+        </ul>
+        <pre>
+import cv2
+
+# Load two images
+image1 = cv2.imread('image1.jpg', 0)
+image2 = cv2.imread('image2.jpg', 0)
+
+# Detect ORB keypoints and descriptors
+orb = cv2.ORB_create()
+kp1, des1 = orb.detectAndCompute(image1, None)
+kp2, des2 = orb.detectAndCompute(image2, None)
+
+# Match features using FLANN
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+matches = bf.match(des1, des2)
+
+# Draw matches
+matched_img = cv2.drawMatches(image1, kp1, image2, kp2, matches[:50], None)
+cv2.imwrite('matched_image.jpg', matched_img)
+        </pre>
+
+        <h3>2. Intensity-Based Registration</h3>
+        <p>Directly compares pixel intensities using optimization techniques.</p>
+        <ul>
+            <li><strong>Mutual Information:</strong> Measures statistical dependence between images.</li>
+            <li><strong>Normalized Cross-Correlation:</strong> Compares image similarity in overlapping regions.</li>
+        </ul>
+
+        <h3>3. Optical Flow</h3>
+        <p>Estimates pixel motion between frames in sequences, widely used in video processing.</p>
+        <pre>
+flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+        </pre>
+
+        <h2>Applications of Image Registration</h2>
+        <ul>
+            <li><strong>Medical Diagnosis:</strong> Combining images from different modalities for better diagnosis.</li>
+            <li><strong>Remote Sensing:</strong> Aligning satellite images for environmental monitoring.</li>
+            <li><strong>Panorama Stitching:</strong> Creating wide-field views by merging overlapping images.</li>
+            <li><strong>Motion Analysis:</strong> Tracking changes in surveillance applications.</li>
+        </ul>
+
+        <h2>Challenges in Image Registration</h2>
+        <p>Despite its wide applications, image registration faces challenges such as:</p>
+        <ul>
+            <li><strong>Noise and Artifacts:</strong> Presence of noise can affect feature detection.</li>
+            <li><strong>Computational Complexity:</strong> Non-rigid registration can be computationally expensive.</li>
+            <li><strong>Multi-Modal Data:</strong> Aligning images from different imaging techniques can be difficult.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://docs.opencv.org/">OpenCV Documentation</a></li>
+            <li><a href="https://www.slicer.org/">3D Slicer - Medical Image Registration</a></li>
+            <li><a href="https://scikit-image.org/">scikit-image - Image Processing in Python</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Image_registration">Image Registration (Wikipedia)</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
