@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Image Representation and Fundamentals">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Image Representation and Fundamentals</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: #D7DBDD;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        h1, h2 {
+            color: #005792;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        a {
+            color: #005792;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Image Representation and Fundamentals</h1>
+        <p>Understanding how digital images are represented and processed</p>
+    </header>
+
+    <div class="container">
+        <h2>What is an Image?</h2>
+        <p>An image is a two-dimensional function representing light intensity at each spatial position. In digital form, an image is represented by a grid of pixels, where each pixel holds numerical values corresponding to brightness or color.</p>
+
+        <h2>Types of Digital Images</h2>
+        <p>Digital images can be classified into various types based on their content and representation:</p>
+        
+        <ul>
+            <li><strong>Grayscale Images:</strong> Each pixel contains a single intensity value, typically ranging from 0 (black) to 255 (white).</li>
+            <li><strong>Binary Images:</strong> Pixels are represented by 0 or 1, used for segmentation and pattern recognition.</li>
+            <li><strong>RGB (Color) Images:</strong> Each pixel has three values (Red, Green, Blue) to define color.</li>
+            <li><strong>Indexed Images:</strong> Uses a colormap where pixel values correspond to specific colors in a predefined palette.</li>
+        </ul>
+
+        <h2>Image Resolution</h2>
+        <p>Resolution refers to the amount of detail in an image, defined by:</p>
+        <ul>
+            <li><strong>Spatial Resolution:</strong> Number of pixels in width and height (e.g., 1920x1080).</li>
+            <li><strong>Bit Depth:</strong> The number of bits used per pixel to represent intensity levels (e.g., 8-bit, 16-bit).</li>
+            <li><strong>Temporal Resolution:</strong> Applies to video frames, defining the frame rate (e.g., 30 fps).</li>
+        </ul>
+
+        <h2>Color Spaces</h2>
+        <p>Color spaces define how colors are represented numerically. Some common color spaces include:</p>
+        <ul>
+            <li><strong>RGB:</strong> A combination of Red, Green, and Blue components.</li>
+            <li><strong>HSV (Hue, Saturation, Value):</strong> Separates color information from intensity.</li>
+            <li><strong>CMYK:</strong> Used in printing, based on Cyan, Magenta, Yellow, and Black.</li>
+            <li><strong>Grayscale:</strong> A single-channel representation based on brightness.</li>
+        </ul>
+
+        <h2>Image File Formats</h2>
+        <p>Different image formats are used for various applications based on compression, quality, and compatibility:</p>
+        <ul>
+            <li><strong>JPEG:</strong> Lossy compression, suitable for photographs.</li>
+            <li><strong>PNG:</strong> Lossless compression, suitable for high-quality graphics.</li>
+            <li><strong>BMP:</strong> Uncompressed format, preserving pixel data.</li>
+            <li><strong>DICOM:</strong> Used in medical imaging, stores metadata alongside pixel data.</li>
+        </ul>
+
+        <h2>Image Representation in Programming</h2>
+        <p>In programming environments, images are typically represented as multi-dimensional arrays. For example, in Python using NumPy:</p>
+        <pre>
+import cv2
+import numpy as np
+
+# Load an image
+image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+print(image.shape)  # Output: (height, width)
+        </pre>
+
+        <h2>Image Processing Fundamentals</h2>
+        <p>Basic operations applied to digital images include:</p>
+        <ul>
+            <li><strong>Filtering:</strong> Smoothing, sharpening, and noise reduction.</li>
+            <li><strong>Transformation:</strong> Rotation, scaling, and translation.</li>
+            <li><strong>Segmentation:</strong> Partitioning an image into meaningful regions.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://opencv.org/">OpenCV - An open-source library for computer vision</a></li>
+            <li><a href="https://scikit-image.org/">scikit-image - Image processing in Python</a></li>
+            <li><a href="https://www.imageprocessingplace.com/">Image Processing Place</a></li>
+            <li><a href="https://numpy.org/">NumPy - Fundamental package for scientific computing in Python</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
