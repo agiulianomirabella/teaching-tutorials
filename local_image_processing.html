@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Local Image Processing">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Local Image Processing</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Local Image Processing</h1>
+        <p>Understanding pixel neighborhood operations in image processing</p>
+    </header>
+
+    <div class="container">
+        <h2>What is Local Image Processing?</h2>
+        <p>Local image processing involves operations applied to small regions (neighborhoods) of an image rather than the entire image at once. These operations analyze and modify pixel values based on their surrounding pixels to enhance features, reduce noise, and extract useful information.</p>
+
+        <h2>Types of Local Image Processing Techniques</h2>
+        <p>Local operations are commonly used for various purposes, including:</p>
+        
+        <ul>
+            <li><strong>Filtering:</strong> Enhancing or suppressing specific features, such as edges or noise.</li>
+            <li><strong>Edge Detection:</strong> Identifying boundaries between regions in an image.</li>
+            <li><strong>Morphological Operations:</strong> Processing binary and grayscale images for shape analysis.</li>
+            <li><strong>Texture Analysis:</strong> Extracting local patterns and structures.</li>
+        </ul>
+
+        <h2>Image Filtering</h2>
+        <p>Filtering is a key technique in local processing that modifies pixel values based on their neighborhood.</p>
+        <ul>
+            <li><strong>Smoothing (Blurring):</strong> Reduces noise and fine details using filters such as Gaussian or median filters.</li>
+            <li><strong>Sharpening:</strong> Enhances edges and fine details using high-pass filters.</li>
+            <li><strong>Edge Detection:</strong> Sobel, Prewitt, and Canny filters detect abrupt intensity changes.</li>
+        </ul>
+        <pre>
+import cv2
+import numpy as np
+
+# Load an image
+image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Apply Gaussian blur
+blurred = cv2.GaussianBlur(image, (5,5), 0)
+cv2.imwrite('blurred.jpg', blurred)
+        </pre>
+
+        <h2>Edge Detection</h2>
+        <p>Edge detection techniques find significant changes in intensity that represent object boundaries.</p>
+        <ul>
+            <li><strong>Sobel Operator:</strong> Detects edges by computing intensity gradients in horizontal and vertical directions.</li>
+            <li><strong>Canny Edge Detector:</strong> A multi-stage algorithm that includes noise reduction, gradient calculation, and edge tracing.</li>
+        </ul>
+        <pre>
+# Canny Edge Detection
+edges = cv2.Canny(image, 50, 150)
+cv2.imwrite('edges.jpg', edges)
+        </pre>
+
+        <h2>Morphological Operations</h2>
+        <p>Morphological operations process binary or grayscale images based on shape. They are commonly used for object segmentation and noise removal.</p>
+        <ul>
+            <li><strong>Erosion:</strong> Shrinks objects by removing pixels on boundaries.</li>
+            <li><strong>Dilation:</strong> Expands objects by adding pixels to boundaries.</li>
+            <li><strong>Opening:</strong> Erosion followed by dilation to remove small objects.</li>
+            <li><strong>Closing:</strong> Dilation followed by erosion to fill small gaps.</li>
+        </ul>
+        <pre>
+kernel = np.ones((5,5), np.uint8)
+eroded = cv2.erode(image, kernel, iterations=1)
+dilated = cv2.dilate(image, kernel, iterations=1)
+cv2.imwrite('eroded.jpg', eroded)
+cv2.imwrite('dilated.jpg', dilated)
+        </pre>
+
+        <h2>Texture Analysis</h2>
+        <p>Texture analysis focuses on quantifying patterns within local regions of an image to classify and segment images.</p>
+        <ul>
+            <li><strong>Gray Level Co-occurrence Matrix (GLCM):</strong> Measures texture by analyzing pixel intensity relationships.</li>
+            <li><strong>Local Binary Patterns (LBP):</strong> Captures local structures based on neighboring pixel intensity comparisons.</li>
+        </ul>
+
+        <h2>Applications of Local Image Processing</h2>
+        <p>Local processing techniques are widely used in:</p>
+        <ul>
+            <li>Medical imaging for tumor detection and enhancement.</li>
+            <li>Surveillance systems for motion detection.</li>
+            <li>Document scanning and text recognition.</li>
+            <li>Industrial quality inspection.</li>
+        </ul>
+
+        <h2>Challenges and Considerations</h2>
+        <p>While local image processing offers powerful capabilities, some challenges include:</p>
+        <ul>
+            <li>Choosing appropriate kernel sizes and parameters for specific tasks.</li>
+            <li>Trade-offs between noise removal and feature preservation.</li>
+            <li>Computational efficiency for large images.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://opencv.org/">OpenCV - Open-source computer vision library</a></li>
+            <li><a href="https://scikit-image.org/">scikit-image - Image processing in Python</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Edge_detection">Edge Detection (Wikipedia)</a></li>
+            <li><a href="https://www.kaggle.com/datasets">Kaggle - Image Processing Datasets</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
