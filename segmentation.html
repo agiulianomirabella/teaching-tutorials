@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Segmentation Techniques in Image Processing">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Segmentation</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Segmentation</h1>
+        <p>Understanding image segmentation methods and applications</p>
+    </header>
+
+    <div class="container">
+        <h2>What is Image Segmentation?</h2>
+        <p>Image segmentation is the process of partitioning an image into meaningful regions to simplify analysis and processing. Segmentation is widely used in medical imaging, computer vision, and pattern recognition to isolate objects of interest from the background.</p>
+
+        <h2>Why is Segmentation Important?</h2>
+        <p>Segmentation is crucial for:</p>
+        <ul>
+            <li><strong>Object Detection:</strong> Identifying and classifying objects within an image.</li>
+            <li><strong>Medical Diagnosis:</strong> Isolating organs and abnormalities in medical scans.</li>
+            <li><strong>Autonomous Systems:</strong> Enhancing perception in self-driving cars and robotics.</li>
+            <li><strong>Quality Control:</strong> Detecting defects in industrial processes.</li>
+        </ul>
+
+        <h2>Types of Image Segmentation Techniques</h2>
+        <p>Segmentation techniques are categorized based on the approach used:</p>
+
+        <h3>1. Thresholding-Based Segmentation</h3>
+        <p>Thresholding is the simplest segmentation technique where pixel intensity values are compared to a threshold value to separate objects from the background.</p>
+        <ul>
+            <li><strong>Global Thresholding:</strong> Uses a single threshold value for the entire image.</li>
+            <li><strong>Adaptive Thresholding:</strong> Computes thresholds based on local neighborhoods.</li>
+            <li><strong>Otsu’s Method:</strong> Automatically determines the optimal threshold by minimizing intra-class variance.</li>
+        </ul>
+        <pre>
+import cv2
+
+# Load grayscale image
+image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Apply Otsu's thresholding
+_, thresholded = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+cv2.imwrite('thresholded.jpg', thresholded)
+        </pre>
+
+        <h3>2. Edge-Based Segmentation</h3>
+        <p>Detects object boundaries by identifying significant intensity changes in the image.</p>
+        <ul>
+            <li><strong>Sobel Operator:</strong> Calculates gradient magnitude in horizontal and vertical directions.</li>
+            <li><strong>Canny Edge Detector:</strong> A multi-step approach to detect strong and weak edges.</li>
+        </ul>
+        <pre>
+# Canny Edge Detection
+edges = cv2.Canny(image, 50, 150)
+cv2.imwrite('edges.jpg', edges)
+        </pre>
+
+        <h3>3. Region-Based Segmentation</h3>
+        <p>Groups neighboring pixels with similar properties, such as intensity or color.</p>
+        <ul>
+            <li><strong>Region Growing:</strong> Starts from seed points and expands based on similarity criteria.</li>
+            <li><strong>Watershed Algorithm:</strong> Treats the image as a topographic surface and floods regions to find boundaries.</li>
+        </ul>
+        <pre>
+# Watershed Algorithm
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+_, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+cv2.imwrite('watershed_result.jpg', binary)
+        </pre>
+
+        <h3>4. Clustering-Based Segmentation</h3>
+        <p>Classifies pixels into groups using unsupervised machine learning techniques.</p>
+        <ul>
+            <li><strong>K-Means Clustering:</strong> Divides pixels into K clusters based on similarity.</li>
+            <li><strong>Gaussian Mixture Models (GMM):</strong> Models the distribution of pixel intensities.</li>
+        </ul>
+        <pre>
+from sklearn.cluster import KMeans
+import numpy as np
+
+# Flatten image and apply K-Means clustering
+pixels = image.reshape(-1, 1)
+kmeans = KMeans(n_clusters=3).fit(pixels)
+segmented_image = kmeans.labels_.reshape(image.shape)
+        </pre>
+
+        <h3>5. Deep Learning-Based Segmentation</h3>
+        <p>State-of-the-art segmentation techniques using convolutional neural networks (CNNs).</p>
+        <ul>
+            <li><strong>U-Net:</strong> Widely used for medical image segmentation.</li>
+            <li><strong>Mask R-CNN:</strong> Detects and segments objects in an image.</li>
+            <li><strong>Fully Convolutional Networks (FCN):</strong> Predicts pixel-wise segmentation.</li>
+        </ul>
+
+        <h2>Applications of Image Segmentation</h2>
+        <ul>
+            <li><strong>Medical Imaging:</strong> Identifying tumors, organs, and lesions in scans.</li>
+            <li><strong>Autonomous Vehicles:</strong> Lane detection and obstacle recognition.</li>
+            <li><strong>Satellite Imaging:</strong> Land use and vegetation analysis.</li>
+            <li><strong>Security Systems:</strong> Face and fingerprint recognition.</li>
+        </ul>
+
+        <h2>Challenges and Considerations</h2>
+        <p>While segmentation is powerful, it has challenges such as:</p>
+        <ul>
+            <li>Handling variations in lighting and contrast.</li>
+            <li>Computational complexity for high-resolution images.</li>
+            <li>Choosing the right segmentation technique for specific applications.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://opencv.org/">OpenCV - Computer vision library</a></li>
+            <li><a href="https://scikit-image.org/">scikit-image - Image processing in Python</a></li>
+            <li><a href="https://www.coursera.org/learn/digital-image-processing">Coursera - Digital Image Processing</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Image_segmentation">Image Segmentation (Wikipedia)</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
