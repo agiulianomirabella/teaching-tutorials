@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Frequency Domain Analysis">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Frequency Domain Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Frequency Domain Analysis</h1>
+        <p>Understanding image processing in the frequency domain</p>
+    </header>
+
+    <div class="container">
+        <h2>What is Frequency Domain Analysis?</h2>
+        <p>Frequency domain analysis refers to the process of analyzing and processing images based on their frequency components rather than their spatial representation. It provides valuable insights into patterns, noise, and image characteristics by transforming the image into the frequency domain.</p>
+
+        <h2>Why Use Frequency Domain Analysis?</h2>
+        <p>The frequency domain allows for better handling of specific image processing tasks such as:</p>
+        <ul>
+            <li><strong>Noise Reduction:</strong> Filtering high-frequency noise components.</li>
+            <li><strong>Image Enhancement:</strong> Emphasizing important frequency components for feature extraction.</li>
+            <li><strong>Compression:</strong> Efficiently representing images by focusing on key frequency content.</li>
+            <li><strong>Pattern Recognition:</strong> Identifying repeating structures and periodic patterns.</li>
+        </ul>
+
+        <h2>Fourier Transform</h2>
+        <p>The Fourier Transform is a mathematical tool that decomposes an image into its sinusoidal frequency components. The most commonly used variant in image processing is the <strong>Discrete Fourier Transform (DFT)</strong>, implemented efficiently using the <strong>Fast Fourier Transform (FFT)</strong> algorithm.</p>
+
+        <h3>Mathematical Representation:</h3>
+        <p>For a 2D image \( f(x,y) \), the DFT is given by:</p>
+        <pre>
+F(u,v) = ∑∑ f(x,y) * e^(-j2π(ux/M + vy/N))
+        </pre>
+        <p>Where:</p>
+        <ul>
+            <li>\( f(x,y) \) is the image in the spatial domain</li>
+            <li>\( F(u,v) \) is the transformed image in the frequency domain</li>
+            <li>\( M, N \) are the image dimensions</li>
+        </ul>
+
+        <h2>Common Frequency Domain Filters</h2>
+        <p>Filters are applied in the frequency domain to modify image properties:</p>
+        <ul>
+            <li><strong>Low-Pass Filters:</strong> Preserve low-frequency components (smooths the image).</li>
+            <li><strong>High-Pass Filters:</strong> Enhance edges and fine details by removing low frequencies.</li>
+            <li><strong>Band-Pass Filters:</strong> Retain a specific range of frequencies for feature extraction.</li>
+        </ul>
+
+        <h2>Implementation in Python</h2>
+        <p>Below is an example of performing Fourier Transform in Python using OpenCV and NumPy:</p>
+        <pre>
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load image in grayscale
+image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Compute the 2D Fourier Transform
+dft = np.fft.fft2(image)
+dft_shift = np.fft.fftshift(dft)
+
+# Compute the magnitude spectrum
+magnitude_spectrum = 20 * np.log(np.abs(dft_shift))
+
+# Display the result
+plt.subplot(121), plt.imshow(image, cmap='gray')
+plt.title('Original Image'), plt.axis('off')
+
+plt.subplot(122), plt.imshow(magnitude_spectrum, cmap='gray')
+plt.title('Magnitude Spectrum'), plt.axis('off')
+
+plt.show()
+        </pre>
+
+        <h2>Applications of Frequency Domain Analysis</h2>
+        <ul>
+            <li><strong>Medical Imaging:</strong> Enhancing medical scans by reducing noise and improving contrast.</li>
+            <li><strong>Remote Sensing:</strong> Detecting patterns in satellite images.</li>
+            <li><strong>Optical Character Recognition (OCR):</strong> Preprocessing text images for better recognition.</li>
+            <li><strong>Image Compression:</strong> JPEG compression utilizes frequency-based encoding techniques.</li>
+        </ul>
+
+        <h2>Challenges and Considerations</h2>
+        <p>While frequency domain analysis is powerful, there are some challenges:</p>
+        <ul>
+            <li>Computational complexity for large images.</li>
+            <li>Interpretation of frequency components may require domain knowledge.</li>
+            <li>Artifacts introduced by improper filtering.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://opencv.org/">OpenCV - Computer vision library</a></li>
+            <li><a href="https://numpy.org/">NumPy - Python numerical computing</a></li>
+            <li><a href="https://www.coursera.org/learn/digital-image-processing">Coursera - Digital Image Processing</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Fourier_transform">Fourier Transform (Wikipedia)</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
