@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Global Image Transformations">
+    <meta name="author" content="A. Giuliano Mirabella">
+    <title>Global Image Transformations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: #D7DBDD;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        h1, h2 {
+            color: #005792;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        a {
+            color: #005792;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Global Image Transformations</h1>
+        <p>Understanding transformations applied to the entire image</p>
+    </header>
+
+    <div class="container">
+        <h2>What are Global Image Transformations?</h2>
+        <p>Global image transformations are operations applied to the entire image, affecting all pixels uniformly. These transformations include geometric operations, intensity adjustments, and spatial transformations that change the image's appearance and structure.</p>
+
+        <h2>Types of Global Transformations</h2>
+        <p>Common global transformations include:</p>
+        
+        <ul>
+            <li><strong>Geometric Transformations:</strong> Operations that change the spatial relationship of pixels, such as scaling, rotation, and translation.</li>
+            <li><strong>Intensity Transformations:</strong> Adjustments that modify pixel values to enhance contrast, brightness, or apply thresholding.</li>
+            <li><strong>Frequency Domain Transformations:</strong> Techniques like Fourier Transform that modify the image in the frequency domain for filtering purposes.</li>
+        </ul>
+
+        <h2>Geometric Transformations</h2>
+        <p>Geometric transformations manipulate the position of pixels to achieve effects like resizing, rotating, and warping.</p>
+        <ul>
+            <li><strong>Scaling:</strong> Enlarges or shrinks an image by a given factor.</li>
+            <li><strong>Rotation:</strong> Rotates the image around a specified point or center.</li>
+            <li><strong>Translation:</strong> Moves the image by shifting pixel positions.</li>
+            <li><strong>Affine Transformations:</strong> Maintains parallel lines while transforming.</li>
+            <li><strong>Perspective Transformations:</strong> Changes the viewpoint of an image.</li>
+        </ul>
+
+        <h2>Intensity Transformations</h2>
+        <p>Intensity-based transformations modify pixel values globally to improve visibility or segment an image.</p>
+        <ul>
+            <li><strong>Contrast Stretching:</strong> Expands the intensity range of the image.</li>
+            <li><strong>Histogram Equalization:</strong> Improves contrast by redistributing pixel intensity values.</li>
+            <li><strong>Thresholding:</strong> Converts grayscale images to binary by setting a threshold value.</li>
+            <li><strong>Log and Power-Law Transformations:</strong> Used for enhancing details in low-contrast images.</li>
+        </ul>
+
+        <h2>Mathematical Representation of Transformations</h2>
+        <p>Global transformations can be represented mathematically using transformation matrices:</p>
+        <pre>
+# Example: Rotation matrix
+import cv2
+import numpy as np
+
+image = cv2.imread('image.jpg')
+rows, cols = image.shape[:2]
+
+# Rotation matrix: rotate by 45 degrees
+M = cv2.getRotationMatrix2D((cols/2, rows/2), 45, 1)
+rotated_image = cv2.warpAffine(image, M, (cols, rows))
+        </pre>
+
+        <h2>Application of Global Transformations</h2>
+        <p>These transformations are widely used in:</p>
+        <ul>
+            <li>Medical imaging to align and normalize scans.</li>
+            <li>Computer vision for object detection and tracking.</li>
+            <li>Image enhancement for better visual representation.</li>
+        </ul>
+
+        <h2>Challenges and Considerations</h2>
+        <p>When applying global transformations, some challenges to consider include:</p>
+        <ul>
+            <li>Loss of image quality due to interpolation.</li>
+            <li>Computational cost for large images.</li>
+            <li>Preserving important features during transformation.</li>
+        </ul>
+
+        <h2>Further Learning Resources</h2>
+        <ul>
+            <li><a href="https://docs.opencv.org/">OpenCV Documentation</a></li>
+            <li><a href="https://scipy.org/">SciPy - Scientific computing in Python</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/Image_transformation">Image Transformation (Wikipedia)</a></li>
+            <li><a href="https://www.kaggle.com/datasets">Kaggle - Image Processing Datasets</a></li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+    </footer>
+</body>
+</html>
