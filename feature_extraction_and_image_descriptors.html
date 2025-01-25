@@ -46,7 +46,7 @@
             <div class="code-tab" onclick="switchCode('edge-detection-matlab')">MATLAB</div>
         </div>
 
-        <div id="edge-detection-python" class="code-block active">
+        <div class="code-block active">
             <pre>
 import cv2
 
@@ -59,7 +59,7 @@ cv2.imwrite('edges.jpg', edges)
             </pre>
         </div>
 
-        <div id="edge-detection-matlab" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB code for edge detection
 I = imread('image.jpg');
@@ -80,7 +80,7 @@ imwrite(edges, 'edges.jpg');
             <div class="code-tab" onclick="switchCode('glcm-matlab')">MATLAB</div>
         </div>
 
-        <div id="glcm-python" class="code-block active">
+        <div class="code-block active">
             <pre>
 from skimage.feature import graycomatrix, graycoprops
 
@@ -91,7 +91,7 @@ print("Contrast:", contrast)
             </pre>
         </div>
 
-        <div id="glcm-matlab" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB code for computing GLCM
 I = imread('image.jpg');
@@ -116,7 +116,7 @@ disp(['Contrast: ', num2str(contrast)]);
             <div class="code-tab" onclick="switchCode('contours-matlab')">MATLAB</div>
         </div>
 
-        <div id="contours-python" class="code-block active">
+        <div class="code-block active">
             <pre>
 # Find contours
 contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -125,7 +125,7 @@ cv2.imwrite('contours.jpg', image)
             </pre>
         </div>
 
-        <div id="contours-matlab" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB code for finding contours
 I = imread('image.jpg');
@@ -163,7 +163,7 @@ imwrite(Ioverlay, 'contours.jpg');
             <div class="code-tab" onclick="switchCode('orb-matlab')">MATLAB</div>
         </div>
 
-        <div id="orb-python" class="code-block active">
+        <div class="code-block active">
             <pre>
 # ORB keypoint detection
 orb = cv2.ORB_create()
@@ -173,7 +173,7 @@ cv2.imwrite('keypoints.jpg', output)
             </pre>
         </div>
 
-        <div id="orb-matlab" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB code for ORB keypoint detection
 I = imread('image.jpg');
@@ -199,7 +199,7 @@ imwrite(output, 'keypoints.jpg');
             <div class="code-tab" onclick="switchCode('hist-matlab')">MATLAB</div>
         </div>
 
-        <div id="hist-python" class="code-block active">
+        <div class="code-block active">
             <pre>
 # Compute color histogram
 hist = cv2.calcHist([image], [0], None, [256], [0,256])
@@ -207,7 +207,7 @@ cv2.normalize(hist, hist)
             </pre>
         </div>
 
-        <div id="hist-matlab" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB code for color histogram
 I = imread('image.jpg');
