@@ -6,7 +6,41 @@
     <meta name="description" content="Global Image Transformations">
     <meta name="author" content="A. Giuliano Mirabella">
     <title>Global Image Transformations</title>
-    <link rel="stylesheet" href="styles.css">
+
+    <!-- Original styles + small additions for demos -->
+    <style>
+        /* Simple toggle button styling for interactive demos */
+        .demo-toggle {
+            cursor: pointer;
+            background-color: #eee;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+        .demo-content {
+            display: none;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+
+        /* Canvas styling */
+        canvas {
+            border: 1px solid #ccc;
+            display: block;
+            margin-top: 10px;
+            max-width: 100%;
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 10px;
+        }
+        label {
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -296,11 +330,331 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             <li><a href="https://www.kaggle.com/datasets">Kaggle</a> – Large repository of datasets that can be used to practice or benchmark transformation techniques.</li>
             <li><em>Digital Image Processing</em> by Gonzalez & Woods – A classic textbook discussing many of these transformations and their mathematical foundations.</li>
         </ul>
-    </div>
+
+        <!-- 10. INTERACTIVE DEMOS -->
+        <h2>10. Interactive Demos</h2>
+        <p>
+            Below are live demos illustrating some key global transformations—geometric, intensity, and frequency-domain—directly in the browser. 
+            Click each section to expand and interact with the sliders. Feel free to modify or integrate these examples in your projects.
+        </p>
+
+        <!-- 10.1: Geometric Transformations Demo -->
+        <div class="demo-toggle" onclick="toggleDemo('demo-geometric')">
+            <strong>Geometric Transformations Demo (Click to Expand/Collapse)</strong>
+        </div>
+        <div id="demo-geometric" class="demo-content">
+            <p>Use the sliders to rotate, scale, and translate the image on an HTML canvas.</p>
+            <label>
+              Rotation (degrees): 
+              <input type="range" id="rotation" min="0" max="360" value="0" />
+            </label>
+            <br />
+            <label>
+              Scale: 
+              <input type="range" id="scale" min="10" max="200" value="100" />
+            </label>
+            <br />
+            <label>
+              Translate X: 
+              <input type="range" id="translateX" min="-200" max="200" value="0" />
+            </label>
+            <br />
+            <label>
+              Translate Y: 
+              <input type="range" id="translateY" min="-200" max="200" value="0" />
+            </label>
+            <canvas id="canvasGeometric" width="600" height="400"></canvas>
+        </div>
+
+        <!-- 10.2: Intensity Transformations Demo -->
+        <div class="demo-toggle" onclick="toggleDemo('demo-intensity')">
+            <strong>Intensity Transformations Demo (Click to Expand/Collapse)</strong>
+        </div>
+        <div id="demo-intensity" class="demo-content">
+            <p>Adjust brightness, contrast, or apply thresholding to convert the image into black and white.</p>
+            <div class="slider-group">
+              <label for="brightness">Brightness:</label>
+              <input type="range" id="brightness" min="-100" max="100" value="0" />
+            </div>
+            <div class="slider-group">
+              <label for="contrast">Contrast:</label>
+              <input type="range" id="contrast" min="0" max="200" value="100" />
+            </div>
+            <div class="slider-group">
+              <label for="threshold">Threshold (0–255):</label>
+              <input type="range" id="threshold" min="0" max="255" value="128" />
+              <input type="checkbox" id="applyThreshold"/> <span>Apply threshold</span>
+            </div>
+            <canvas id="canvasIntensity" width="640" height="426"></canvas>
+        </div>
+
+        <!-- 10.3: Frequency Domain Demo -->
+        <div class="demo-toggle" onclick="toggleDemo('demo-frequency')">
+            <strong>Frequency Domain Demo (Click to Expand/Collapse)</strong>
+        </div>
+        <div id="demo-frequency" class="demo-content">
+            <p>
+                This example uses <strong>OpenCV.js</strong> to apply a simple low-pass filter in the frequency domain. 
+                Move the “Cutoff Frequency” slider to see how it removes (or retains) high-frequency details.
+            </p>
+            <label for="cutoff">Cutoff Frequency (% of max):</label>
+            <input type="range" id="cutoff" min="0" max="100" value="50"/>
+            <br />
+            <!-- Two canvases: one hidden for input, one for output -->
+            <canvas id="canvasFreqInput" style="display:none;"></canvas>
+            <canvas id="canvasFreqOutput"></canvas>
+        </div>
+    </div> <!-- /.container -->
 
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
-    <script src="script.js"></script>
+
+    <!-- Optional: If using the frequency domain demo, load OpenCV.js (4.x) -->
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+
+    <script>
+    /*****************************************************************
+     * Simple tab switcher for the code snippets in the article
+     *****************************************************************/
+    function switchCode(tabId) {
+      let allTabs = document.querySelectorAll(".code-tab");
+      let allBlocks = document.querySelectorAll(".code-block");
+      allTabs.forEach(t => t.classList.remove("active"));
+      allBlocks.forEach(b => b.classList.remove("active"));
+
+      document.getElementById(tabId).classList.add("active");
+      event.target.classList.add("active");
+    }
+
+    /*****************************************************************
+     * Collapsible toggles for the interactive demos
+     *****************************************************************/
+    function toggleDemo(demoId) {
+      const elem = document.getElementById(demoId);
+      elem.style.display = (elem.style.display === "block") ? "none" : "block";
+    }
+
+    /*****************************************************************
+     * 1) GEOMETRIC TRANSFORMATIONS DEMO
+     *****************************************************************/
+    const canvasGeom = document.getElementById("canvasGeometric");
+    let ctxGeom;
+    let imgGeom;
+    if (canvasGeom) {
+      ctxGeom = canvasGeom.getContext("2d");
+
+      // Sliders
+      const rotationInput  = document.getElementById("rotation");
+      const scaleInput     = document.getElementById("scale");
+      const translateXInput= document.getElementById("translateX");
+      const translateYInput= document.getElementById("translateY");
+
+      // Load an example image
+      imgGeom = new Image();
+      imgGeom.crossOrigin = "anonymous";
+      imgGeom.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Example-image-500kb.jpg/640px-Example-image-500kb.jpg";
+
+      imgGeom.onload = () => drawGeometric();
+
+      // Attach events
+      [rotationInput, scaleInput, translateXInput, translateYInput].forEach(input => {
+        input.addEventListener("input", drawGeometric);
+      });
+
+      function drawGeometric() {
+        // Clear canvas
+        ctxGeom.clearRect(0, 0, canvasGeom.width, canvasGeom.height);
+
+        // Get slider values
+        const rotationDeg = parseFloat(rotationInput.value);
+        const scaleVal    = parseFloat(scaleInput.value) / 100;
+        const translateX  = parseFloat(translateXInput.value);
+        const translateY  = parseFloat(translateYInput.value);
+
+        // Move origin to canvas center
+        ctxGeom.save();
+        ctxGeom.translate(canvasGeom.width / 2, canvasGeom.height / 2);
+
+        // Apply transformations
+        ctxGeom.rotate((Math.PI / 180) * rotationDeg);
+        ctxGeom.scale(scaleVal, scaleVal);
+        ctxGeom.translate(translateX, translateY);
+
+        // Draw image
+        ctxGeom.drawImage(imgGeom, -imgGeom.width / 2, -imgGeom.height / 2);
+
+        ctxGeom.restore();
+      }
+    }
+
+    /*****************************************************************
+     * 2) INTENSITY TRANSFORMATIONS DEMO
+     *****************************************************************/
+    const canvasInt = document.getElementById("canvasIntensity");
+    let ctxInt;
+    let imgInt;
+    if (canvasInt) {
+      ctxInt = canvasInt.getContext("2d");
+
+      const brightnessInput    = document.getElementById("brightness");
+      const contrastInput      = document.getElementById("contrast");
+      const thresholdInput     = document.getElementById("threshold");
+      const applyThresholdCheckbox = document.getElementById("applyThreshold");
+
+      imgInt = new Image();
+      imgInt.crossOrigin = "anonymous";
+      imgInt.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Claude_Monet_-_Impression%2C_Sunrise.jpg/640px-Claude_Monet_-_Impression%2C_Sunrise.jpg";
+
+      imgInt.onload = function() {
+        canvasInt.width = imgInt.width;
+        canvasInt.height = imgInt.height;
+        drawIntensity();
+      };
+
+      [brightnessInput, contrastInput, thresholdInput, applyThresholdCheckbox].forEach(el => {
+        el.addEventListener("input", drawIntensity);
+      });
+
+      function drawIntensity() {
+        // Draw the original image
+        ctxInt.drawImage(imgInt, 0, 0, canvasInt.width, canvasInt.height);
+
+        const brightness   = parseInt(brightnessInput.value);
+        const contrastVal  = parseInt(contrastInput.value);
+        const threshold    = parseInt(thresholdInput.value);
+        const applyThresh  = applyThresholdCheckbox.checked;
+
+        let imageData = ctxInt.getImageData(0, 0, canvasInt.width, canvasInt.height);
+        let data = imageData.data;
+
+        // Contrast factor: 100 => 1.0, 200 => 2.0, etc.
+        const contrastFactor = contrastVal / 100;
+
+        for (let i = 0; i < data.length; i += 4) {
+          let r = data[i];
+          let g = data[i+1];
+          let b = data[i+2];
+          // alpha channel is data[i+3], typically unchanged
+
+          // Brightness shift
+          r += brightness;
+          g += brightness;
+          b += brightness;
+
+          // Contrast scale around midpoint (128)
+          r = ((r - 128) * contrastFactor) + 128;
+          g = ((g - 128) * contrastFactor) + 128;
+          b = ((b - 128) * contrastFactor) + 128;
+
+          // Optional threshold (convert to grayscale first)
+          if (applyThresh) {
+            let gray = 0.299*r + 0.587*g + 0.114*b; 
+            if (gray < threshold) {
+              r = g = b = 0;
+            } else {
+              r = g = b = 255;
+            }
+          }
+
+          // Clamp to [0,255]
+          data[i]   = Math.max(0, Math.min(255, r));
+          data[i+1] = Math.max(0, Math.min(255, g));
+          data[i+2] = Math.max(0, Math.min(255, b));
+        }
+        ctxInt.putImageData(imageData, 0, 0);
+      }
+    }
+
+    /*****************************************************************
+     * 3) FREQUENCY DOMAIN DEMO (requires OpenCV.js)
+     *****************************************************************/
+    let srcMat, canvasFreqIn, canvasFreqOut;
+    if (document.getElementById("canvasFreqInput")) {
+      canvasFreqIn = document.getElementById("canvasFreqInput");
+      canvasFreqOut= document.getElementById("canvasFreqOutput");
+
+      let cutoffSlider = document.getElementById("cutoff");
+
+      const freqImg = new Image();
+      freqImg.crossOrigin = "anonymous";
+      freqImg.src = "https://upload.wikimedia.org/wikipedia/commons/a/a1/John_Constable_-_Wivenhoe_Park%2C_Essex.jpg";
+
+      freqImg.onload = function() {
+        canvasFreqIn.width  = freqImg.width;
+        canvasFreqIn.height = freqImg.height;
+        canvasFreqOut.width = freqImg.width;
+        canvasFreqOut.height= freqImg.height;
+        let ctxFreqIn = canvasFreqIn.getContext("2d");
+        ctxFreqIn.drawImage(freqImg, 0, 0);
+
+        // We'll create srcMat once OpenCV.js loads
+        // then apply the filter
+        if (cv && cv.imread) {
+          srcMat = new cv.Mat();
+          cv.imshow("canvasFreqInput", srcMat); // Just to initialize (not strictly necessary)
+
+          srcMat = cv.imread(canvasFreqIn);
+          applyFrequencyFilter();
+        }
+      };
+
+      // Listen for slider changes
+      cutoffSlider.addEventListener("input", applyFrequencyFilter);
+
+      function applyFrequencyFilter() {
+        if (!srcMat || !cv || !cv.Mat) return;
+        let cutoffVal = parseInt(cutoffSlider.value);
+
+        let grayMat = new cv.Mat();
+        cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
+
+        // Convert to 32F
+        let floatMat = new cv.Mat();
+        grayMat.convertTo(floatMat, cv.CV_32FC1);
+
+        // DFT
+        let dftMat = new cv.Mat();
+        cv.dft(floatMat, dftMat, cv.DFT_COMPLEX_OUTPUT);
+
+        // Mask for low-pass
+        let rows = dftMat.rows, cols = dftMat.cols;
+        let radius = (cutoffVal / 100) * (Math.min(rows, cols) / 2);
+
+        let mask = new cv.Mat.zeros(rows, cols, dftMat.type());
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            let dist = Math.sqrt(Math.pow(r - rows/2, 2) + Math.pow(c - cols/2, 2));
+            if (dist < radius) {
+              // Set real=1, imag=1 in mask
+              mask.floatPtr(r, c)[0] = 1.0;
+              mask.floatPtr(r, c)[1] = 1.0;
+            }
+          }
+        }
+        // Multiply
+        cv.multiply(dftMat, mask, dftMat);
+
+        // IDFT
+        let idftMat = new cv.Mat();
+        cv.idft(dftMat, idftMat, cv.DFT_REAL_OUTPUT + cv.DFT_SCALE);
+
+        // Convert to 8U
+        let outMat = new cv.Mat();
+        idftMat.convertTo(outMat, cv.CV_8UC1);
+
+        // Display
+        cv.imshow("canvasFreqOutput", outMat);
+
+        // Cleanup
+        grayMat.delete();
+        floatMat.delete();
+        dftMat.delete();
+        mask.delete();
+        idftMat.delete();
+        outMat.delete();
+      }
+    }
+    </script>
 </body>
 </html>
