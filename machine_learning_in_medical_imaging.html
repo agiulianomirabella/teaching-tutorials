@@ -36,7 +36,14 @@
             <li><strong>Classification:</strong> Identifying conditions such as tumors or fractures.</li>
             <li><strong>Regression:</strong> Estimating disease progression or severity.</li>
         </ul>
-        <pre>
+
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-supervised')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-supervised')">MATLAB</div>
+        </div>
+
+        <div id="python-supervised" class="code-block active">
+            <pre>
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import numpy as np
@@ -47,7 +54,38 @@ y = np.load('labels.npy')
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 clf = RandomForestClassifier()
 clf.fit(X_train, y_train)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="matlab-supervised" class="code-block">
+            <pre>
+% Example: Train a Random Forest classifier in MATLAB
+
+% Load features and labels
+load('features.mat'); % Contains 'features' array
+load('labels.mat');   % Contains 'labels' array
+
+% Split data into training and testing sets (80-20 split)
+cv = cvpartition(labels,'Holdout',0.2);
+X_train = features(training(cv),:);
+y_train = labels(training(cv),:);
+X_test  = features(test(cv),:);
+y_test  = labels(test(cv),:);
+
+% Train a random forest classifier
+numTrees = 100;
+rfModel = TreeBagger(numTrees, X_train, y_train, 'Method','classification');
+
+% Predict using the trained model
+y_pred = predict(rfModel, X_test);
+
+% Convert predictions to numeric if necessary
+y_pred = str2double(y_pred);
+
+% Evaluate performance (optional, e.g., confusion matrix)
+confMat = confusionmat(y_test, y_pred);
+            </pre>
+        </div>
 
         <h3>2. Unsupervised Learning</h3>
         <p>Unsupervised learning finds patterns in medical images without labeled data.</p>
@@ -63,7 +101,14 @@ clf.fit(X_train, y_train)
             <li><strong>Recurrent Neural Networks (RNNs):</strong> Used for sequential medical data like ultrasound frames.</li>
             <li><strong>Autoencoders:</strong> Used for anomaly detection and image enhancement.</li>
         </ul>
-        <pre>
+
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-deep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-deep')">MATLAB</div>
+        </div>
+
+        <div id="python-deep" class="code-block active">
+            <pre>
 import tensorflow as tf
 from tensorflow.keras import layers
 
@@ -76,17 +121,83 @@ model = tf.keras.Sequential([
     layers.Dense(1, activation='sigmoid')
 ])
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-        </pre>
+            </pre>
+        </div>
+
+        <div id="matlab-deep" class="code-block">
+            <pre>
+% Simple CNN model for medical image classification in MATLAB
+
+layers = [
+    imageInputLayer([128 128 1])
+    convolution2dLayer(3,32,'Padding','same')
+    reluLayer
+    maxPooling2dLayer(2,'Stride',2)
+    fullyConnectedLayer(128)
+    reluLayer
+    fullyConnectedLayer(1)
+    sigmoidLayer
+    classificationLayer];
+
+options = trainingOptions('adam', ...
+    'MiniBatchSize', 64, ...
+    'MaxEpochs', 10, ...
+    'Shuffle','every-epoch', ...
+    'Plots','training-progress', ...
+    'Verbose',false);
+
+% Assume XTrain is an array of size [128 128 1 numImages]
+% and YTrain is a categorical vector of labels
+net = trainNetwork(XTrain, YTrain, layers, options);
+            </pre>
+        </div>
 
         <h3>4. Transfer Learning</h3>
         <p>Transfer learning leverages pre-trained deep learning models (e.g., VGG, ResNet) to improve medical image analysis with limited data.</p>
-        <pre>
+
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-transfer')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-transfer')">MATLAB</div>
+        </div>
+
+        <div id="python-transfer" class="code-block active">
+            <pre>
 from tensorflow.keras.applications import VGG16
 
 # Load pre-trained model
 base_model = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
 base_model.trainable = False  # Freeze base model layers
-        </pre>
+            </pre>
+        </div>
+
+        <div id="matlab-transfer" class="code-block">
+            <pre>
+% Load pre-trained VGG16 model
+net = vgg16;
+
+% Convert to layer graph
+lgraph = layerGraph(net);
+
+% Remove the last 3 layers to prepare for transfer learning
+lgraph = removeLayers(lgraph, {'fc8','prob','output'});
+
+% Freeze the convolutional layers
+for layerIdx = 1:length(lgraph.Layers)
+    if isa(lgraph.Layers(layerIdx),'nnet.cnn.layer.Convolution2DLayer')
+        lgraph.Layers(layerIdx).WeightLearnRateFactor = 0;
+        lgraph.Layers(layerIdx).BiasLearnRateFactor = 0;
+    end
+end
+
+% You can then add new layers for your specific classification task
+newLayers = [
+    fullyConnectedLayer(2,'Name','fc8') % Example for 2 classes
+    softmaxLayer('Name','softmax')
+    classificationLayer('Name','classoutput')];
+lgraph = addLayers(lgraph,newLayers);
+lgraph = connectLayers(lgraph,'drop7','fc8');
+            </pre>
+        </div>
 
         <h2>Challenges in Medical Imaging with Machine Learning</h2>
         <p>Despite its advantages, machine learning in medical imaging faces several challenges:</p>
@@ -127,5 +238,7 @@ base_model.trainable = False  # Freeze base model layers
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
