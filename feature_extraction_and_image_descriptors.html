@@ -42,11 +42,11 @@
             <li><strong>Canny Edge Detector:</strong> A multi-step approach to detect strong and weak edges.</li>
         </ul>
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('edge-python')">Python</div>
-            <div class="code-tab" onclick="switchCode('edge-matlab')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-edge')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-edge')">MATLAB</div>
         </div>
 
-        <div id="edge-python" class="code-block active">
+        <div id="python-edge" class="code-block active">
             <pre>
 import cv2
 
@@ -59,7 +59,7 @@ cv2.imwrite('edges.jpg', edges)
             </pre>
         </div>
 
-        <div id="edge-matlab" class="code-block">
+        <div id="matlab-edge" class="code-block">
             <pre>
 % Edge detection
 I = imread('image.jpg');
@@ -76,11 +76,11 @@ imwrite(edges, 'edges.jpg');
             <li><strong>Local Binary Patterns (LBP):</strong> Encodes texture based on neighborhood pixel intensity differences.</li>
         </ul>
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('texture-python')">Python</div>
-            <div class="code-tab" onclick="switchCode('texture-matlab')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-texture')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-texture')">MATLAB</div>
         </div>
 
-        <div id="texture-python" class="code-block active">
+        <div id="python-texture" class="code-block active">
             <pre>
 from skimage.feature import graycomatrix, graycoprops
 
@@ -91,7 +91,7 @@ print("Contrast:", contrast)
             </pre>
         </div>
 
-        <div id="texture-matlab" class="code-block">
+        <div id="matlab-texture" class="code-block">
             <pre>
 % MATLAB code for computing GLCM
 I = imread('image.jpg');
@@ -112,11 +112,11 @@ disp(['Contrast: ', num2str(contrast)]);
         </ul>
         
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('shape-python')">Python</div>
-            <div class="code-tab" onclick="switchCode('shape-matlab')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-texture')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-texture')">MATLAB</div>
         </div>
 
-        <div id="shape-python" class="code-block active">
+        <div id="python-texture" class="code-block active">
             <pre>
 # Find contours
 contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -125,7 +125,7 @@ cv2.imwrite('contours.jpg', image)
             </pre>
         </div>
 
-        <div id="shape-matlab" class="code-block">
+        <div id="matlab-texture" class="code-block">
             <pre>
 % MATLAB code for finding contours
 I = imread('image.jpg');
@@ -159,11 +159,11 @@ imwrite(Ioverlay, 'contours.jpg');
         </ul>
 
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('keypoint-python')">Python</div>
-            <div class="code-tab" onclick="switchCode('keypoint-matlab')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-keypoint')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-keypoint')">MATLAB</div>
         </div>
 
-        <div id="keypoint-python" class="code-block active">
+        <div id="python-keypoint" class="code-block active">
             <pre>
 # ORB keypoint detection
 orb = cv2.ORB_create()
@@ -173,7 +173,7 @@ cv2.imwrite('keypoints.jpg', output)
             </pre>
         </div>
 
-        <div id="keypoint-matlab" class="code-block">
+        <div id="matlab-keypoint" class="code-block">
             <pre>
 % MATLAB code for ORB keypoint detection
 I = imread('image.jpg');
@@ -195,11 +195,11 @@ imwrite(output, 'keypoints.jpg');
         </ul>
 
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('color-python')">Python</div>
-            <div class="code-tab" onclick="switchCode('color-matlab')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-color')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-color')">MATLAB</div>
         </div>
 
-        <div id="color-python" class="code-block active">
+        <div id="python-color" class="code-block active">
             <pre>
 # Compute color histogram
 hist = cv2.calcHist([image], [0], None, [256], [0,256])
@@ -207,7 +207,7 @@ cv2.normalize(hist, hist)
             </pre>
         </div>
 
-        <div id="color-matlab" class="code-block">
+        <div id="matlab-color" class="code-block">
             <pre>
 % MATLAB code for color histogram
 I = imread('image.jpg');
