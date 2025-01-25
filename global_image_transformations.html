@@ -396,7 +396,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     
         // Load an example image
         imgGeom = new Image();
-        imgGeom.crossOrigin = "anonymous";
         imgGeom.src = "image1.jpeg";
     
         imgGeom.onload = () => drawGeometric();
@@ -447,7 +446,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         const applyThresholdCheckbox = document.getElementById("applyThreshold");
     
         imgInt = new Image();
-        imgInt.crossOrigin = "anonymous";
         imgInt.src = "image1.jpeg";
     
         imgInt.onload = function() {
@@ -526,7 +524,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             let cutoffSlider = document.getElementById("cutoff");
     
             const freqImg = new Image();
-            freqImg.crossOrigin = "anonymous";
             freqImg.src = "image1.jpeg";
     
             freqImg.onload = function() {
@@ -557,6 +554,9 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
                 applyFrequencyFilter();
             };
 
+            freqImg.onerror = function() {
+                console.error("Error loading image. Check the path and network.");
+            };
     
             // Listen for slider changes
             cutoffSlider.addEventListener("input", applyFrequencyFilter);
