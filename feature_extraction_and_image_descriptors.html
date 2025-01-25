@@ -93,7 +93,7 @@ print("Contrast:", contrast)
 
         <div id="matlab-texture" class="code-block">
             <pre>
-% MATLAB code for computing GLCM
+% Compute GLCM
 I = imread('image.jpg');
 Igray = rgb2gray(I);
 offsets = [0 1];
@@ -127,7 +127,7 @@ cv2.imwrite('contours.jpg', image)
 
         <div id="matlab-texture" class="code-block">
             <pre>
-% MATLAB code for finding contours
+% Find contours
 I = imread('image.jpg');
 Igray = rgb2gray(I);
 BW = imbinarize(Igray);
@@ -175,7 +175,7 @@ cv2.imwrite('keypoints.jpg', output)
 
         <div id="matlab-keypoint" class="code-block">
             <pre>
-% MATLAB code for ORB keypoint detection
+% ORB keypoint detection
 I = imread('image.jpg');
 Igray = rgb2gray(I);
 points = detectORBFeatures(Igray);
@@ -209,7 +209,7 @@ cv2.normalize(hist, hist)
 
         <div id="matlab-color" class="code-block">
             <pre>
-% MATLAB code for color histogram
+% Compute color histogram
 I = imread('image.jpg');
 % Convert to grayscale if it's a color image
 if size(I,3) == 3
