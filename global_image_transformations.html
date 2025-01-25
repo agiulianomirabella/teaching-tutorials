@@ -513,7 +513,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       /*****************************************************************
        * 3) FREQUENCY DOMAIN DEMO (requires OpenCV.js)
        *****************************************************************/
-    cv.onRuntimeInitialized = () => {
       let srcMat, canvasFreqIn, canvasFreqOut;
       if (document.getElementById("canvasFreqInput")) {
         canvasFreqIn = document.getElementById("canvasFreqInput");
@@ -598,7 +597,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           outMat.delete();
         }
       }
-    };
 
     // Expose helper functions on window:
     window.toggleDemo = toggleDemo;
