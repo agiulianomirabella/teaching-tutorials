@@ -61,7 +61,15 @@
             <li><strong>Speeded-Up Robust Features (SURF):</strong> Faster alternative to SIFT with similar robustness.</li>
             <li><strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Efficient keypoint detection and matching.</li>
         </ul>
-        <pre>
+
+        <!-- Code Snippet with Python and MATLAB Tabs (Feature-Based Registration) -->
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep1')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep1')">MATLAB</div>
+        </div>
+
+        <div id="python-rep1" class="code-block active">
+            <pre>
 import cv2
 
 # Load two images
@@ -73,14 +81,45 @@ orb = cv2.ORB_create()
 kp1, des1 = orb.detectAndCompute(image1, None)
 kp2, des2 = orb.detectAndCompute(image2, None)
 
-# Match features using FLANN
+# Match features using BFMatcher
 bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 matches = bf.match(des1, des2)
 
 # Draw matches
 matched_img = cv2.drawMatches(image1, kp1, image2, kp2, matches[:50], None)
 cv2.imwrite('matched_image.jpg', matched_img)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="matlab-rep1" class="code-block">
+            <pre>
+% MATLAB version of feature-based registration using ORB features
+
+% Read images
+image1 = imread('image1.jpg');
+image2 = imread('image2.jpg');
+grayImage1 = rgb2gray(image1);
+grayImage2 = rgb2gray(image2);
+
+% Detect ORB keypoints
+points1 = detectORBFeatures(grayImage1);
+points2 = detectORBFeatures(grayImage2);
+
+% Extract features
+[features1, validPoints1] = extractFeatures(grayImage1, points1);
+[features2, validPoints2] = extractFeatures(grayImage2, points2);
+
+% Match features
+indexPairs = matchFeatures(features1, features2);
+matchedPoints1 = validPoints1(indexPairs(:,1), :);
+matchedPoints2 = validPoints2(indexPairs(:,2), :);
+
+% Display matched points
+figure;
+showMatchedFeatures(image1, image2, matchedPoints1, matchedPoints2, 'montage');
+title('Putative matches using ORB features');
+            </pre>
+        </div>
 
         <h3>2. Intensity-Based Registration</h3>
         <p>Directly compares pixel intensities using optimization techniques.</p>
@@ -91,9 +130,40 @@ cv2.imwrite('matched_image.jpg', matched_img)
 
         <h3>3. Optical Flow</h3>
         <p>Estimates pixel motion between frames in sequences, widely used in video processing.</p>
-        <pre>
+        
+        <!-- Code Snippet with Python and MATLAB Tabs (Optical Flow) -->
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep2')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep2')">MATLAB</div>
+        </div>
+
+        <div id="python-rep2" class="code-block active">
+            <pre>
 flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="matlab-rep2" class="code-block">
+            <pre>
+% MATLAB version of optical flow calculation using the Farneback method
+
+% Read images
+image1 = imread('image1.jpg');
+image2 = imread('image2.jpg');
+gray1 = rgb2gray(image1);
+gray2 = rgb2gray(image2);
+
+opticFlow = opticalFlowFarneback;
+
+% Estimate flow for the first image (initialization)
+flow1 = estimateFlow(opticFlow, gray1);
+
+% Estimate flow for the second image
+flow2 = estimateFlow(opticFlow, gray2);
+
+% The flow vectors are in flow2.Vx and flow2.Vy
+            </pre>
+        </div>
 
         <h2>Applications of Image Registration</h2>
         <ul>
@@ -123,5 +193,7 @@ flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2,
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
