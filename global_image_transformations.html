@@ -419,7 +419,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       // Load an example image
       imgGeom = new Image();
       imgGeom.crossOrigin = "anonymous";
-      imgGeom.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Example-image-500kb.jpg/640px-Example-image-500kb.jpg";
+      imgGeom.src = "image1.jpeg";
 
       imgGeom.onload = () => drawGeometric();
 
@@ -470,7 +470,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
       imgInt = new Image();
       imgInt.crossOrigin = "anonymous";
-      imgInt.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Claude_Monet_-_Impression%2C_Sunrise.jpg/640px-Claude_Monet_-_Impression%2C_Sunrise.jpg";
+      imgInt.src = "image1.jpeg";
 
       imgInt.onload = function() {
         canvasInt.width = imgInt.width;
@@ -544,7 +544,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
       const freqImg = new Image();
       freqImg.crossOrigin = "anonymous";
-      freqImg.src = "https://upload.wikimedia.org/wikipedia/commons/a/a1/John_Constable_-_Wivenhoe_Park%2C_Essex.jpg";
+      freqImg.src = "image1.jpeg";
 
       freqImg.onload = function() {
         canvasFreqIn.width  = freqImg.width;
