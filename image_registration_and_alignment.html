@@ -62,13 +62,12 @@
             <li><strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Efficient keypoint detection and matching.</li>
         </ul>
 
-        <!-- Code Snippet with Python and MATLAB Tabs (Feature-Based Registration) -->
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('python-rep1')">Python</div>
-            <div class="code-tab" onclick="switchCode('matlab-rep1')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-orb')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-orb')">MATLAB</div>
         </div>
 
-        <div class="code-block active">
+        <div id="python-orb" class="code-block active">
             <pre>
 import cv2
 
@@ -91,10 +90,8 @@ cv2.imwrite('matched_image.jpg', matched_img)
             </pre>
         </div>
 
-        <div class="code-block">
+        <div id="matlab-orb" class="code-block">
             <pre>
-% MATLAB version of feature-based registration using ORB features
-
 % Read images
 image1 = imread('image1.jpg');
 image2 = imread('image2.jpg');
@@ -131,19 +128,18 @@ title('Putative matches using ORB features');
         <h3>3. Optical Flow</h3>
         <p>Estimates pixel motion between frames in sequences, widely used in video processing.</p>
         
-        <!-- Code Snippet with Python and MATLAB Tabs (Optical Flow) -->
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('python-rep2')">Python</div>
-            <div class="code-tab" onclick="switchCode('matlab-rep2')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-optical')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-optical')">MATLAB</div>
         </div>
 
-        <div class="code-block active">
+        <div id="python-optical" class="code-block active">
             <pre>
 flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
             </pre>
         </div>
 
-        <div class="code-block">
+        <div id="matlab-optical" class="code-block">
             <pre>
 % MATLAB version of optical flow calculation using the Farneback method
 
@@ -193,7 +189,6 @@ flow2 = estimateFlow(opticFlow, gray2);
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
-
     <script src="script.js"></script>
 </body>
 </html>
