@@ -35,7 +35,13 @@
             <li><strong>Sharpening:</strong> Enhances edges and fine details using high-pass filters.</li>
             <li><strong>Edge Detection:</strong> Sobel, Prewitt, and Canny filters detect abrupt intensity changes.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 import cv2
 import numpy as np
 
@@ -45,20 +51,60 @@ image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
 # Apply Gaussian blur
 blurred = cv2.GaussianBlur(image, (5,5), 0)
 cv2.imwrite('blurred.jpg', blurred)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Read the grayscale image
+image = imread('image.jpg');
+image_gray = rgb2gray(image);
+
+% Apply Gaussian blur
+kernel_size = [5 5];
+sigma = 0; % Standard deviation, 0 lets MATLAB choose automatically
+blurred = imgaussfilt(image_gray, sigma, 'FilterSize', kernel_size);
+
+% Save the blurred image
+imwrite(blurred, 'blurred.jpg');
+            </pre>
+        </div>
         <h2>Edge Detection</h2>
         <p>Edge detection techniques find significant changes in intensity that represent object boundaries.</p>
         <ul>
             <li><strong>Sobel Operator:</strong> Detects edges by computing intensity gradients in horizontal and vertical directions.</li>
             <li><strong>Canny Edge Detector:</strong> A multi-stage algorithm that includes noise reduction, gradient calculation, and edge tracing.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 # Canny Edge Detection
 edges = cv2.Canny(image, 50, 150)
 cv2.imwrite('edges.jpg', edges)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Read the image
+image = imread('input_image.jpg');
+
+% Convert to grayscale if necessary
+if size(image, 3) == 3
+    image = rgb2gray(image);
+end
+
+% Apply Canny edge detection
+edges = edge(image, 'Canny', [0.2 0.6]);
+
+% Save the edge-detected image
+imwrite(edges, 'edges.jpg');
+            </pre>
+        </div>
         <h2>Morphological Operations</h2>
         <p>Morphological operations process binary or grayscale images based on shape. They are commonly used for object segmentation and noise removal.</p>
         <ul>
@@ -67,14 +113,33 @@ cv2.imwrite('edges.jpg', edges)
             <li><strong>Opening:</strong> Erosion followed by dilation to remove small objects.</li>
             <li><strong>Closing:</strong> Dilation followed by erosion to fill small gaps.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
+# Apply morphological operations (erosion and dilation)
 kernel = np.ones((5,5), np.uint8)
 eroded = cv2.erode(image, kernel, iterations=1)
 dilated = cv2.dilate(image, kernel, iterations=1)
 cv2.imwrite('eroded.jpg', eroded)
 cv2.imwrite('dilated.jpg', dilated)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Apply morphological operations (erosion and dilation)
+image = imread('image.jpg');
+kernel = ones(5, 5, 'uint8');
+eroded = imerode(image, kernel);
+dilated = imdilate(image, kernel);
+imwrite(eroded, 'eroded.jpg');
+imwrite(dilated, 'dilated.jpg');
+            </pre>
+        </div>
         <h2>Texture Analysis</h2>
         <p>Texture analysis focuses on quantifying patterns within local regions of an image to classify and segment images.</p>
         <ul>
