@@ -49,11 +49,11 @@
         <h2>Mathematical Representation of Transformations</h2>
         <p>Global transformations can be represented mathematically using transformation matrices:</p>
         <div class="code-tabs">
-            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
-            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+            <div class="code-tab active" onclick="switchCode('python-rotation')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rotation')">MATLAB</div>
         </div>
 
-        <div class="code-block active">
+        <div id="python-rotation" class="code-block active">
             <pre>
 # Example: Rotation matrix
 import cv2
@@ -68,7 +68,7 @@ rotated_image = cv2.warpAffine(image, M, (cols, rows))
             </pre>
         </div>
 
-        <div class="code-block">
+        <div id="matlab-rotation" class="code-block">
             <pre>
 % Example: Rotation matrix
 image = imread('image.jpg');
@@ -120,7 +120,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
-
     <script src="script.js"></script>
 </body>
 </html>
