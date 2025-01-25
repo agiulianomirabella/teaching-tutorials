@@ -530,27 +530,31 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             freqImg.src = "image1.jpeg";
     
             freqImg.onload = function() {
-              canvasFreqIn.width  = freqImg.width;
-              canvasFreqIn.height = freqImg.height;
-              canvasFreqOut.width = freqImg.width;
-              canvasFreqOut.height= freqImg.height;
-              let ctxFreqIn = canvasFreqIn.getContext("2d");
-              ctxFreqIn.drawImage(freqImg, 0, 0);
-    
-              // Now that OpenCV is ready, create srcMat:
-              srcMat = new cv.Mat();
-              // Initialize:
-              cv.imshow("canvasFreqInput", srcMat); // not strictly necessary
-              srcMat = cv.imread(canvasFreqIn);
+                canvasFreqIn.width  = freqImg.width;
+                canvasFreqIn.height = freqImg.height;
+                canvasFreqOut.width = freqImg.width;
+                canvasFreqOut.height= freqImg.height;
                 
-              // Convert to RGBA format before creating ImageData to avoid length errors
-              let rgbaMat = new cv.Mat();
-              cv.cvtColor(srcMat, rgbaMat, cv.COLOR_RGB2RGBA);
-              var imgData = new ImageData(new Uint8ClampedArray(rgbaMat.data), rgbaMat.cols, rgbaMat.rows);
-              rgbaMat.delete();  // Cleanup memory
+                let ctxFreqIn = canvasFreqIn.getContext("2d");
+                ctxFreqIn.drawImage(freqImg, 0, 0);
                 
-              applyFrequencyFilter();
+                // Read image into OpenCV Mat
+                srcMat = cv.imread(canvasFreqIn);
+                
+                if (srcMat.empty()) {
+                    console.error("Error: Failed to load image to OpenCV matrix.");
+                    return;
+                }
+            
+                // Convert image to RGBA to avoid length issues
+                let rgbaMat = new cv.Mat();
+                cv.cvtColor(srcMat, rgbaMat, cv.COLOR_RGB2RGBA);
+                var imgData = new ImageData(new Uint8ClampedArray(rgbaMat.data), rgbaMat.cols, rgbaMat.rows);
+                rgbaMat.delete();  // Cleanup memory
+            
+                applyFrequencyFilter();
             };
+
     
             // Listen for slider changes
             cutoffSlider.addEventListener("input", applyFrequencyFilter);
