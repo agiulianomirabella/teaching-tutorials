@@ -530,6 +530,8 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             freqImg.src = "image1.jpeg";
     
             freqImg.onload = function() {
+                console.log("Image loaded successfully:", freqImg.width, freqImg.height);
+                
                 canvasFreqIn.width  = freqImg.width;
                 canvasFreqIn.height = freqImg.height;
                 canvasFreqOut.width = freqImg.width;
