@@ -79,7 +79,25 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
         <div id="matlab-rep" class="code-block">
             <pre>
+% Example: Rotation matrix
+image = imread('image.jpg');
+[rows, cols, ~] = size(image);
 
+% Rotation matrix: rotate by 45 degrees
+theta = 45; % Rotation angle in degrees
+scale = 1;  % Scaling factor
+
+% Compute the rotation matrix
+M = [cosd(theta), -sind(theta), (1 - cosd(theta)) * (cols/2) + sind(theta) * (rows/2);
+     sind(theta),  cosd(theta), (1 - cosd(theta)) * (rows/2) - sind(theta) * (cols/2)];
+
+% Perform the affine transformation
+rotated_image = imwarp(image, affine2d([M; 0 0 1]), 'OutputView', imref2d([rows cols]));
+
+% Display the original and rotated images
+figure;
+subplot(1,2,1); imshow(image); title('Original Image');
+subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             </pre>
         </div>
 
