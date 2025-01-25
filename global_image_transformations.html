@@ -376,7 +376,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
     <script src="script.js"></script>
-    <script src="opencv.js"></script>
+    <script async src="opencv/opencv.js" onload="onOpenCvReady()" onerror="onOpenCvError()"></script>
 
     <script>
       /*****************************************************************
@@ -513,90 +513,101 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       /*****************************************************************
        * 3) FREQUENCY DOMAIN DEMO (requires OpenCV.js)
        *****************************************************************/
-      let srcMat, canvasFreqIn, canvasFreqOut;
-      if (document.getElementById("canvasFreqInput")) {
-        canvasFreqIn = document.getElementById("canvasFreqInput");
-        canvasFreqOut= document.getElementById("canvasFreqOutput");
-
-        let cutoffSlider = document.getElementById("cutoff");
-
-        const freqImg = new Image();
-        freqImg.crossOrigin = "anonymous";
-        freqImg.src = "image1.jpeg";
-
-        freqImg.onload = function() {
-          canvasFreqIn.width  = freqImg.width;
-          canvasFreqIn.height = freqImg.height;
-          canvasFreqOut.width = freqImg.width;
-          canvasFreqOut.height= freqImg.height;
-          let ctxFreqIn = canvasFreqIn.getContext("2d");
-          ctxFreqIn.drawImage(freqImg, 0, 0);
-
-          // Now that OpenCV is ready, create srcMat:
-          srcMat = new cv.Mat();
-          // Initialize:
-          cv.imshow("canvasFreqInput", srcMat); // not strictly necessary
-          srcMat = cv.imread(canvasFreqIn);
-
-          applyFrequencyFilter();
-        };
-
-        // Listen for slider changes
-        cutoffSlider.addEventListener("input", applyFrequencyFilter);
-
-        function applyFrequencyFilter() {
-          if (!srcMat || !cv || !cv.Mat) return;
-          let cutoffVal = parseInt(cutoffSlider.value);
-
-          let grayMat = new cv.Mat();
-          cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
-
-          // Convert to 32F
-          let floatMat = new cv.Mat();
-          grayMat.convertTo(floatMat, cv.CV_32FC1);
-
-          // DFT
-          let dftMat = new cv.Mat();
-          cv.dft(floatMat, dftMat, cv.DFT_COMPLEX_OUTPUT);
-
-          // Build mask for low-pass
-          let rows = dftMat.rows, cols = dftMat.cols;
-          let radius = (cutoffVal / 100) * (Math.min(rows, cols) / 2);
-
-          let mask = new cv.Mat.zeros(rows, cols, dftMat.type());
-          for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              let dist = Math.sqrt(Math.pow(r - rows/2, 2) + Math.pow(c - cols/2, 2));
-              if (dist < radius) {
-                // Set real=1, imag=1 in mask
-                mask.floatPtr(r, c)[0] = 1.0;
-                mask.floatPtr(r, c)[1] = 1.0;
+    function onOpenCvReady() {
+        console.log('OpenCV.js is ready');
+        cv['onRuntimeInitialized'] = () => {
+          console.log('OpenCV runtime initialized');
+                
+          let srcMat, canvasFreqIn, canvasFreqOut;
+          if (document.getElementById("canvasFreqInput")) {
+            canvasFreqIn = document.getElementById("canvasFreqInput");
+            canvasFreqOut= document.getElementById("canvasFreqOutput");
+    
+            let cutoffSlider = document.getElementById("cutoff");
+    
+            const freqImg = new Image();
+            freqImg.crossOrigin = "anonymous";
+            freqImg.src = "image1.jpeg";
+    
+            freqImg.onload = function() {
+              canvasFreqIn.width  = freqImg.width;
+              canvasFreqIn.height = freqImg.height;
+              canvasFreqOut.width = freqImg.width;
+              canvasFreqOut.height= freqImg.height;
+              let ctxFreqIn = canvasFreqIn.getContext("2d");
+              ctxFreqIn.drawImage(freqImg, 0, 0);
+    
+              // Now that OpenCV is ready, create srcMat:
+              srcMat = new cv.Mat();
+              // Initialize:
+              cv.imshow("canvasFreqInput", srcMat); // not strictly necessary
+              srcMat = cv.imread(canvasFreqIn);
+    
+              applyFrequencyFilter();
+            };
+    
+            // Listen for slider changes
+            cutoffSlider.addEventListener("input", applyFrequencyFilter);
+    
+            function applyFrequencyFilter() {
+              if (!srcMat || !cv || !cv.Mat) return;
+              let cutoffVal = parseInt(cutoffSlider.value);
+    
+              let grayMat = new cv.Mat();
+              cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
+    
+              // Convert to 32F
+              let floatMat = new cv.Mat();
+              grayMat.convertTo(floatMat, cv.CV_32FC1);
+    
+              // DFT
+              let dftMat = new cv.Mat();
+              cv.dft(floatMat, dftMat, cv.DFT_COMPLEX_OUTPUT);
+    
+              // Build mask for low-pass
+              let rows = dftMat.rows, cols = dftMat.cols;
+              let radius = (cutoffVal / 100) * (Math.min(rows, cols) / 2);
+    
+              let mask = new cv.Mat.zeros(rows, cols, dftMat.type());
+              for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                  let dist = Math.sqrt(Math.pow(r - rows/2, 2) + Math.pow(c - cols/2, 2));
+                  if (dist < radius) {
+                    // Set real=1, imag=1 in mask
+                    mask.floatPtr(r, c)[0] = 1.0;
+                    mask.floatPtr(r, c)[1] = 1.0;
+                  }
+                }
               }
+              // Multiply
+              cv.multiply(dftMat, mask, dftMat);
+    
+              // IDFT
+              let idftMat = new cv.Mat();
+              cv.idft(dftMat, idftMat, cv.DFT_REAL_OUTPUT + cv.DFT_SCALE);
+    
+              // Convert to 8U
+              let outMat = new cv.Mat();
+              idftMat.convertTo(outMat, cv.CV_8UC1);
+    
+              // Display
+              cv.imshow("canvasFreqOutput", outMat);
+    
+              // Cleanup
+              grayMat.delete();
+              floatMat.delete();
+              dftMat.delete();
+              mask.delete();
+              idftMat.delete();
+              outMat.delete();
             }
           }
-          // Multiply
-          cv.multiply(dftMat, mask, dftMat);
+        };
+    }
 
-          // IDFT
-          let idftMat = new cv.Mat();
-          cv.idft(dftMat, idftMat, cv.DFT_REAL_OUTPUT + cv.DFT_SCALE);
-
-          // Convert to 8U
-          let outMat = new cv.Mat();
-          idftMat.convertTo(outMat, cv.CV_8UC1);
-
-          // Display
-          cv.imshow("canvasFreqOutput", outMat);
-
-          // Cleanup
-          grayMat.delete();
-          floatMat.delete();
-          dftMat.delete();
-          mask.delete();
-          idftMat.delete();
-          outMat.delete();
-        }
-      }
+    function onOpenCvError() {
+        console.error('Failed to load OpenCV.js');
+    }
 
     // Expose helper functions on window:
     window.toggleDemo = toggleDemo;
