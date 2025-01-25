@@ -25,3 +25,7 @@ function switchCode(clickedId) {
         }
     });
 }
+function toggleDemo(demoId) {
+    const elem = document.getElementById(demoId);
+    elem.style.display = (elem.style.display === "block") ? "none" : "block";
+}
