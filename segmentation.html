@@ -42,7 +42,7 @@
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 import cv2
 
@@ -55,7 +55,7 @@ cv2.imwrite('thresholded.jpg', thresholded)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Load grayscale image
 image = imread('image.jpg');
@@ -81,7 +81,7 @@ imwrite(thresholded, 'thresholded.jpg');
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 # Canny Edge Detection
 edges = cv2.Canny(image, 50, 150)
@@ -89,7 +89,7 @@ cv2.imwrite('edges.jpg', edges)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Apply Canny edge detection
 edges = edge(grayImage, 'Canny', [50 150]/255);
@@ -110,7 +110,7 @@ imwrite(edges, 'edges.jpg');
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 # Watershed Algorithm
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -119,7 +119,7 @@ cv2.imwrite('watershed_result.jpg', binary)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Apply Otsu's thresholding with inverse binary mode
 level = graythresh(grayImage);  % Compute Otsu's threshold (normalized 0-1)
@@ -142,7 +142,7 @@ imwrite(binary, 'watershed_result.jpg');
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 from sklearn.cluster import KMeans
 import numpy as np
@@ -154,7 +154,7 @@ segmented_image = kmeans.labels_.reshape(image.shape)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Flatten the image into a column vector
 pixels = image(:);
@@ -203,5 +203,6 @@ segmented_image = reshape(idx, size(image));
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+    <script src="script.js"></script>
 </body>
 </html>
