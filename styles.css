@@ -93,14 +93,13 @@ pre {
 canvas {
     border: 1px solid #ccc;
     display: block;
-    margin-top: 10px;
+    margin: 10px auto; /* centers the canvas horizontally */
     max-width: 100%;
 }
 
-/* Sliders */
-.slider-group {
-    margin-bottom: 10px;
-}
-label {
-    margin-right: 5px;
+/* Sliders: spacing + center alignment */
+.slider-group,
+.demo-content label {
+    margin: 10px auto;
+    display: inline-block;
 }
