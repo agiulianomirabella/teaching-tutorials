@@ -375,35 +375,15 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
-
-    <!-- Load OpenCV.js (no 'async' to ensure it's ready when we need it) -->
+    <script src="script.js"></script>
     <script src="opencv.js"></script>
 
-    <!-- Wrap ALL code that references cv inside onRuntimeInitialized -->
     <script>
+    /*****************************************************************
+    * Collapsible toggles for the interactive demos
+    *****************************************************************/
+
     cv.onRuntimeInitialized = () => {
-
-      /*****************************************************************
-       * Simple tab switcher for the code snippets in the article
-       *****************************************************************/
-      function switchCode(tabId) {
-        let allTabs = document.querySelectorAll(".code-tab");
-        let allBlocks = document.querySelectorAll(".code-block");
-        allTabs.forEach(t => t.classList.remove("active"));
-        allBlocks.forEach(b => b.classList.remove("active"));
-
-        document.getElementById(tabId).classList.add("active");
-        event.target.classList.add("active");
-      }
-
-      /*****************************************************************
-       * Collapsible toggles for the interactive demos
-       *****************************************************************/
-      function toggleDemo(demoId) {
-        const elem = document.getElementById(demoId);
-        elem.style.display = (elem.style.display === "block") ? "none" : "block";
-      }
-
       /*****************************************************************
        * 1) GEOMETRIC TRANSFORMATIONS DEMO
        *****************************************************************/
@@ -628,6 +608,5 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       window.toggleDemo = toggleDemo;
     };
     </script>
-    <script src="script.js"></script>
 </body>
 </html>
