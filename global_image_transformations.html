@@ -48,18 +48,40 @@
 
         <h2>Mathematical Representation of Transformations</h2>
         <p>Global transformations can be represented mathematically using transformation matrices:</p>
-        <pre>
-# Example: Rotation matrix
-import cv2
-import numpy as np
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
 
-image = cv2.imread('image.jpg')
-rows, cols = image.shape[:2]
+        <div id="python-rep" class="code-block active">
+            <pre>
+% Example: Rotation matrix
+image = imread('image.jpg');
+[rows, cols, ~] = size(image);
 
-# Rotation matrix: rotate by 45 degrees
-M = cv2.getRotationMatrix2D((cols/2, rows/2), 45, 1)
-rotated_image = cv2.warpAffine(image, M, (cols, rows))
-        </pre>
+% Rotation matrix: rotate by 45 degrees
+theta = 45; % Rotation angle in degrees
+scale = 1;  % Scaling factor
+
+% Compute the rotation matrix
+M = [cosd(theta), -sind(theta), (1 - cosd(theta)) * (cols/2) + sind(theta) * (rows/2);
+     sind(theta),  cosd(theta), (1 - cosd(theta)) * (rows/2) - sind(theta) * (cols/2)];
+
+% Perform the affine transformation
+rotated_image = imwarp(image, affine2d([M; 0 0 1]), 'OutputView', imref2d([rows cols]));
+
+% Display the original and rotated images
+figure;
+subplot(1,2,1); imshow(image); title('Original Image');
+subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
+            </pre>
+        </div>
+
+        <div id="matlab-rep" class="code-block">
+            <pre>
+
+            </pre>
+        </div>
 
         <h2>Application of Global Transformations</h2>
         <p>These transformations are widely used in:</p>
@@ -89,5 +111,7 @@ rotated_image = cv2.warpAffine(image, M, (cols, rows))
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
