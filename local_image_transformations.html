@@ -40,7 +40,7 @@
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 import cv2
 import numpy as np
@@ -54,7 +54,7 @@ cv2.imwrite('blurred.jpg', blurred)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Read the grayscale image
 image = imread('image.jpg');
@@ -80,7 +80,7 @@ imwrite(blurred, 'blurred.jpg');
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 # Canny Edge Detection
 edges = cv2.Canny(image, 50, 150)
@@ -88,7 +88,7 @@ cv2.imwrite('edges.jpg', edges)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Read the image
 image = imread('input_image.jpg');
@@ -118,7 +118,7 @@ imwrite(edges, 'edges.jpg');
             <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
         </div>
 
-        <div id="python-rep" class="code-block active">
+        <div class="code-block active">
             <pre>
 # Apply morphological operations (erosion and dilation)
 kernel = np.ones((5,5), np.uint8)
@@ -129,7 +129,7 @@ cv2.imwrite('dilated.jpg', dilated)
             </pre>
         </div>
 
-        <div id="matlab-rep" class="code-block">
+        <div class="code-block">
             <pre>
 % Apply morphological operations (erosion and dilation)
 image = imread('image.jpg');
@@ -176,5 +176,6 @@ imwrite(dilated, 'dilated.jpg');
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+    <script src="script.js"></script>
 </body>
 </html>
