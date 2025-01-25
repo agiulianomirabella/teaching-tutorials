@@ -56,15 +56,46 @@
 
         <h2>Image Representation in Programming</h2>
         <p>In programming environments, images are typically represented as multi-dimensional arrays. For example, in Python using NumPy:</p>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 import cv2
 import numpy as np
 
-# Load an image
+# Load an image in grayscale
 image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
-print(image.shape)  # Output: (height, width)
-        </pre>
 
+# Get image dimensions
+height, width = image.shape
+print(f"Height: {height}, Width: {width}")
+
+# Display the image
+cv2.imshow('Grayscale Image', image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+            </pre>
+        </div>
+
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Load an image in grayscale
+image = imread('image.jpg');
+gray_image = rgb2gray(image);
+
+% Get image dimensions
+[height, width] = size(gray_image);
+disp(['Height: ', num2str(height), ', Width: ', num2str(width)]);
+
+% Display the image
+imshow(gray_image);
+title('Grayscale Image');
+            </pre>
+        </div>
+        
         <h2>Image Processing Fundamentals</h2>
         <p>Basic operations applied to digital images include:</p>
         <ul>
@@ -85,5 +116,7 @@ print(image.shape)  # Output: (height, width)
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
