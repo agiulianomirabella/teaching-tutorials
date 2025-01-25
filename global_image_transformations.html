@@ -542,7 +542,13 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
               // Initialize:
               cv.imshow("canvasFreqInput", srcMat); // not strictly necessary
               srcMat = cv.imread(canvasFreqIn);
-    
+                
+              // Convert to RGBA format before creating ImageData to avoid length errors
+              let rgbaMat = new cv.Mat();
+              cv.cvtColor(srcMat, rgbaMat, cv.COLOR_RGB2RGBA);
+              var imgData = new ImageData(new Uint8ClampedArray(rgbaMat.data), rgbaMat.cols, rgbaMat.rows);
+              rgbaMat.delete();  // Cleanup memory
+                
               applyFrequencyFilter();
             };
     
