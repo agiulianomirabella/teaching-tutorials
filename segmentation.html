@@ -37,7 +37,13 @@
             <li><strong>Adaptive Thresholding:</strong> Computes thresholds based on local neighborhoods.</li>
             <li><strong>Otsu’s Method:</strong> Automatically determines the optimal threshold by minimizing intra-class variance.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 import cv2
 
 # Load grayscale image
@@ -46,40 +52,98 @@ image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
 # Apply Otsu's thresholding
 _, thresholded = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 cv2.imwrite('thresholded.jpg', thresholded)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Load grayscale image
+image = imread('image.jpg');
+grayImage = rgb2gray(image);  % Convert to grayscale if needed
+
+% Apply Otsu's thresholding
+level = graythresh(grayImage);  % Compute Otsu's threshold (normalized 0-1)
+thresholded = imbinarize(grayImage, level);  % Apply thresholding
+
+% Convert logical to uint8 for saving (0 or 255)
+thresholded = uint8(thresholded) * 255;
+imwrite(thresholded, 'thresholded.jpg');
+            </pre>
+        </div>
         <h3>2. Edge-Based Segmentation</h3>
         <p>Detects object boundaries by identifying significant intensity changes in the image.</p>
         <ul>
             <li><strong>Sobel Operator:</strong> Calculates gradient magnitude in horizontal and vertical directions.</li>
             <li><strong>Canny Edge Detector:</strong> A multi-step approach to detect strong and weak edges.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 # Canny Edge Detection
 edges = cv2.Canny(image, 50, 150)
 cv2.imwrite('edges.jpg', edges)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Apply Canny edge detection
+edges = edge(grayImage, 'Canny', [50 150]/255);
+
+% Convert logical result to uint8 (0 or 255) for saving
+edges = uint8(edges) * 255;
+imwrite(edges, 'edges.jpg');
+            </pre>
+        </div>
         <h3>3. Region-Based Segmentation</h3>
         <p>Groups neighboring pixels with similar properties, such as intensity or color.</p>
         <ul>
             <li><strong>Region Growing:</strong> Starts from seed points and expands based on similarity criteria.</li>
             <li><strong>Watershed Algorithm:</strong> Treats the image as a topographic surface and floods regions to find boundaries.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 # Watershed Algorithm
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 cv2.imwrite('watershed_result.jpg', binary)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Apply Otsu's thresholding with inverse binary mode
+level = graythresh(grayImage);  % Compute Otsu's threshold (normalized 0-1)
+binary = imbinarize(grayImage, level);
+binary = ~binary;  % Invert the binary image (equivalent to THRESH_BINARY_INV)
+
+% Convert logical to uint8 for saving (0 or 255)
+binary = uint8(binary) * 255;
+imwrite(binary, 'watershed_result.jpg');
+            </pre>
+        </div>
         <h3>4. Clustering-Based Segmentation</h3>
         <p>Classifies pixels into groups using unsupervised machine learning techniques.</p>
         <ul>
             <li><strong>K-Means Clustering:</strong> Divides pixels into K clusters based on similarity.</li>
             <li><strong>Gaussian Mixture Models (GMM):</strong> Models the distribution of pixel intensities.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 from sklearn.cluster import KMeans
 import numpy as np
 
@@ -87,8 +151,22 @@ import numpy as np
 pixels = image.reshape(-1, 1)
 kmeans = KMeans(n_clusters=3).fit(pixels)
 segmented_image = kmeans.labels_.reshape(image.shape)
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Flatten the image into a column vector
+pixels = image(:);
+
+% Apply K-Means clustering with 3 clusters
+n_clusters = 3;
+[idx, ~] = kmeans(double(pixels), n_clusters);
+
+% Reshape the clustered labels back to the original image dimensions
+segmented_image = reshape(idx, size(image));
+            </pre>
+        </div>
         <h3>5. Deep Learning-Based Segmentation</h3>
         <p>State-of-the-art segmentation techniques using convolutional neural networks (CNNs).</p>
         <ul>
