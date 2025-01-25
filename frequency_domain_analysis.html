@@ -52,7 +52,13 @@ F(u,v) = ∑∑ f(x,y) * e^(-j2π(ux/M + vy/N))
 
         <h2>Implementation in Python</h2>
         <p>Below is an example of performing Fourier Transform in Python using OpenCV and NumPy:</p>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('python-rep')">Python</div>
+            <div class="code-tab" onclick="switchCode('matlab-rep')">MATLAB</div>
+        </div>
+
+        <div id="python-rep" class="code-block active">
+            <pre>
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -75,8 +81,33 @@ plt.subplot(122), plt.imshow(magnitude_spectrum, cmap='gray')
 plt.title('Magnitude Spectrum'), plt.axis('off')
 
 plt.show()
-        </pre>
+            </pre>
+        </div>
 
+        <div id="matlab-rep" class="code-block">
+            <pre>
+% Read the image in grayscale
+image = imread('image.jpg');
+image = rgb2gray(image);  % Convert to grayscale if it's not already
+
+% Compute the 2D Fourier Transform
+dft = fft2(double(image));
+dft_shift = fftshift(dft);
+
+% Compute the magnitude spectrum
+magnitude_spectrum = 20 * log(abs(dft_shift));
+
+% Display the result
+figure;
+subplot(1,2,1), imshow(image, []);
+title('Original Image');
+axis off;
+
+subplot(1,2,2), imshow(magnitude_spectrum, []);
+title('Magnitude Spectrum');
+axis off;
+            </pre>
+        </div>
         <h2>Applications of Frequency Domain Analysis</h2>
         <ul>
             <li><strong>Medical Imaging:</strong> Enhancing medical scans by reducing noise and improving contrast.</li>
