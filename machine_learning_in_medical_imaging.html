@@ -42,7 +42,7 @@
             <div class="code-tab" onclick="switchCode('matlab-supervised')">MATLAB</div>
         </div>
 
-        <div id="python-supervised" class="code-block active">
+        <div class="code-block active">
             <pre>
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -57,7 +57,7 @@ clf.fit(X_train, y_train)
             </pre>
         </div>
 
-        <div id="matlab-supervised" class="code-block">
+        <div class="code-block">
             <pre>
 % Example: Train a Random Forest classifier in MATLAB
 
@@ -107,7 +107,7 @@ confMat = confusionmat(y_test, y_pred);
             <div class="code-tab" onclick="switchCode('matlab-deep')">MATLAB</div>
         </div>
 
-        <div id="python-deep" class="code-block active">
+        <div class="code-block active">
             <pre>
 import tensorflow as tf
 from tensorflow.keras import layers
@@ -124,7 +124,7 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']
             </pre>
         </div>
 
-        <div id="matlab-deep" class="code-block">
+        <div class="code-block">
             <pre>
 % Simple CNN model for medical image classification in MATLAB
 
@@ -160,7 +160,7 @@ net = trainNetwork(XTrain, YTrain, layers, options);
             <div class="code-tab" onclick="switchCode('matlab-transfer')">MATLAB</div>
         </div>
 
-        <div id="python-transfer" class="code-block active">
+        <div class="code-block active">
             <pre>
 from tensorflow.keras.applications import VGG16
 
@@ -170,7 +170,7 @@ base_model.trainable = False  # Freeze base model layers
             </pre>
         </div>
 
-        <div id="matlab-transfer" class="code-block">
+        <div class="code-block">
             <pre>
 % Load pre-trained VGG16 model
 net = vgg16;
