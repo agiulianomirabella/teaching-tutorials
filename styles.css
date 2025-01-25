@@ -36,3 +36,38 @@ footer {
     font-size: 0.9em;
     color: #555;
 }
+.code-tabs {
+    display: flex;
+    margin-bottom: 10px;
+}
+.code-tab {
+    cursor: pointer;
+    padding: 10px 20px;
+    background: #D7DBDD;
+    border: 1px solid #ccc;
+    border-radius: 5px 5px 0 0;
+    margin-right: 5px;
+    font-weight: bold;
+}
+.code-tab.active {
+    background: #005792;
+    color: #fff;
+}
+.code-block {
+    display: none;
+    background: #f4f4f4;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    overflow-x: auto;
+}
+.code-block.active {
+    display: block;
+}
+pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
