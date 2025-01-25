@@ -300,8 +300,8 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         <!-- 10. INTERACTIVE DEMOS -->
         <h2>10. Interactive Demos</h2>
         <p>
-            Below are live demos illustrating some key global transformations—geometric, intensity, and frequency-domain—directly in the browser. 
-            Click each section to expand and interact with the sliders. Feel free to modify or integrate these examples in your projects.
+            Below are live demos illustrating some key global transformations—geometric, intensity, and frequency-domain—directly in the browser.
+            Click each section to expand and interact with the sliders.
         </p>
 
         <!-- 10.1: Geometric Transformations Demo -->
@@ -309,7 +309,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             <strong>Geometric Transformations Demo (Click to Expand/Collapse)</strong>
         </div>
         <div id="demo-geometric" class="demo-content">
-            <p>Use the sliders to rotate, scale, and translate the image on an HTML canvas.</p>
+            <p>Use the sliders to rotate, scale, and translate the image.</p>
             <label>
               Rotation (degrees): 
               <input type="range" id="rotation" min="0" max="360" value="0" />
@@ -360,7 +360,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         </div>
         <div id="demo-frequency" class="demo-content">
             <p>
-                This example uses <strong>OpenCV.js</strong> to apply a simple low-pass filter in the frequency domain. 
+                In this example you can apply a simple low-pass filter in the frequency domain. 
                 Move the “Cutoff Frequency” slider to see how it removes (or retains) high-frequency details.
             </p>
             <label for="cutoff">Cutoff Frequency (% of max):</label>
@@ -379,11 +379,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     <script src="opencv.js"></script>
 
     <script>
-    /*****************************************************************
-    * Collapsible toggles for the interactive demos
-    *****************************************************************/
-
-    cv.onRuntimeInitialized = () => {
       /*****************************************************************
        * 1) GEOMETRIC TRANSFORMATIONS DEMO
        *****************************************************************/
@@ -392,51 +387,51 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       let imgGeom;
       if (canvasGeom) {
         ctxGeom = canvasGeom.getContext("2d");
-
+    
         // Sliders
         const rotationInput  = document.getElementById("rotation");
         const scaleInput     = document.getElementById("scale");
         const translateXInput= document.getElementById("translateX");
         const translateYInput= document.getElementById("translateY");
-
+    
         // Load an example image
         imgGeom = new Image();
         imgGeom.crossOrigin = "anonymous";
         imgGeom.src = "image1.jpeg";
-
+    
         imgGeom.onload = () => drawGeometric();
-
+    
         // Attach events
         [rotationInput, scaleInput, translateXInput, translateYInput].forEach(input => {
           input.addEventListener("input", drawGeometric);
         });
-
+    
         function drawGeometric() {
           // Clear canvas
           ctxGeom.clearRect(0, 0, canvasGeom.width, canvasGeom.height);
-
+    
           // Get slider values
           const rotationDeg = parseFloat(rotationInput.value);
           const scaleVal    = parseFloat(scaleInput.value) / 100;
           const translateX  = parseFloat(translateXInput.value);
           const translateY  = parseFloat(translateYInput.value);
-
+    
           // Move origin to canvas center
           ctxGeom.save();
           ctxGeom.translate(canvasGeom.width / 2, canvasGeom.height / 2);
-
+    
           // Apply transformations
           ctxGeom.rotate((Math.PI / 180) * rotationDeg);
           ctxGeom.scale(scaleVal, scaleVal);
           ctxGeom.translate(translateX, translateY);
-
+    
           // Draw image
           ctxGeom.drawImage(imgGeom, -imgGeom.width / 2, -imgGeom.height / 2);
-
+    
           ctxGeom.restore();
         }
       }
-
+    
       /*****************************************************************
        * 2) INTENSITY TRANSFORMATIONS DEMO
        *****************************************************************/
@@ -445,57 +440,57 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       let imgInt;
       if (canvasInt) {
         ctxInt = canvasInt.getContext("2d");
-
+    
         const brightnessInput    = document.getElementById("brightness");
         const contrastInput      = document.getElementById("contrast");
         const thresholdInput     = document.getElementById("threshold");
         const applyThresholdCheckbox = document.getElementById("applyThreshold");
-
+    
         imgInt = new Image();
         imgInt.crossOrigin = "anonymous";
         imgInt.src = "image1.jpeg";
-
+    
         imgInt.onload = function() {
           canvasInt.width = imgInt.width;
           canvasInt.height = imgInt.height;
           drawIntensity();
         };
-
+    
         [brightnessInput, contrastInput, thresholdInput, applyThresholdCheckbox].forEach(el => {
           el.addEventListener("input", drawIntensity);
         });
-
+    
         function drawIntensity() {
           // Draw the original image
           ctxInt.drawImage(imgInt, 0, 0, canvasInt.width, canvasInt.height);
-
+    
           const brightness   = parseInt(brightnessInput.value);
           const contrastVal  = parseInt(contrastInput.value);
           const threshold    = parseInt(thresholdInput.value);
           const applyThresh  = applyThresholdCheckbox.checked;
-
+    
           let imageData = ctxInt.getImageData(0, 0, canvasInt.width, canvasInt.height);
           let data = imageData.data;
-
+    
           // Contrast factor: 100 => 1.0, 200 => 2.0, etc.
           const contrastFactor = contrastVal / 100;
-
+    
           for (let i = 0; i < data.length; i += 4) {
             let r = data[i];
             let g = data[i+1];
             let b = data[i+2];
             // alpha channel is data[i+3], typically unchanged
-
+    
             // Brightness shift
             r += brightness;
             g += brightness;
             b += brightness;
-
+    
             // Contrast scale around midpoint (128)
             r = ((r - 128) * contrastFactor) + 128;
             g = ((g - 128) * contrastFactor) + 128;
             b = ((b - 128) * contrastFactor) + 128;
-
+    
             // Optional threshold (convert to grayscale first)
             if (applyThresh) {
               let gray = 0.299*r + 0.587*g + 0.114*b; 
@@ -505,7 +500,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
                 r = g = b = 255;
               }
             }
-
+    
             // Clamp to [0,255]
             data[i]   = Math.max(0, Math.min(255, r));
             data[i+1] = Math.max(0, Math.min(255, g));
@@ -514,10 +509,11 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           ctxInt.putImageData(imageData, 0, 0);
         }
       }
-
+    
       /*****************************************************************
        * 3) FREQUENCY DOMAIN DEMO (requires OpenCV.js)
        *****************************************************************/
+    cv.onRuntimeInitialized = () => {
       let srcMat, canvasFreqIn, canvasFreqOut;
       if (document.getElementById("canvasFreqInput")) {
         canvasFreqIn = document.getElementById("canvasFreqInput");
@@ -602,11 +598,10 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           outMat.delete();
         }
       }
-
-      // Expose helper functions on window if needed:
-      window.switchCode = switchCode;
-      window.toggleDemo = toggleDemo;
     };
+
+    // Expose helper functions on window:
+    window.toggleDemo = toggleDemo;
     </script>
 </body>
 </html>
