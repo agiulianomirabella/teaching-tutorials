@@ -68,7 +68,7 @@
             <div class="code-tab" onclick="switchCode('matlab-rep1')">MATLAB</div>
         </div>
 
-        <div id="python-rep1" class="code-block active">
+        <div class="code-block active">
             <pre>
 import cv2
 
@@ -91,7 +91,7 @@ cv2.imwrite('matched_image.jpg', matched_img)
             </pre>
         </div>
 
-        <div id="matlab-rep1" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB version of feature-based registration using ORB features
 
@@ -137,13 +137,13 @@ title('Putative matches using ORB features');
             <div class="code-tab" onclick="switchCode('matlab-rep2')">MATLAB</div>
         </div>
 
-        <div id="python-rep2" class="code-block active">
+        <div class="code-block active">
             <pre>
 flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
             </pre>
         </div>
 
-        <div id="matlab-rep2" class="code-block">
+        <div class="code-block">
             <pre>
 % MATLAB version of optical flow calculation using the Farneback method
 
