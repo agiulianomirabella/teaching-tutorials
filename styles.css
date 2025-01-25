@@ -71,3 +71,35 @@ pre {
     border-radius: 5px;
     overflow-x: auto;
 }
+
+/* Simple toggle button styling for interactive demos */
+.demo-toggle {
+    cursor: pointer;
+    background-color: #eee;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+}
+.demo-content {
+    display: none;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #fafafa;
+}
+
+/* Canvas styling */
+canvas {
+    border: 1px solid #ccc;
+    display: block;
+    margin-top: 10px;
+    max-width: 100%;
+}
+
+/* Sliders */
+.slider-group {
+    margin-bottom: 10px;
+}
+label {
+    margin-right: 5px;
+}
