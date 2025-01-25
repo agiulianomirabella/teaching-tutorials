@@ -11,57 +11,126 @@
 <body>
     <header>
         <h1>Image Registration and Alignment</h1>
-        <p>Understanding the techniques and applications of image alignment</p>
+        <p>Understanding the techniques, transformations, and applications of image alignment</p>
     </header>
 
     <div class="container">
+        <!-- 1. WHAT IS IMAGE REGISTRATION? -->
         <h2>What is Image Registration?</h2>
-        <p>Image registration is the process of aligning multiple images of the same scene taken at different times, perspectives, or sensors. It is widely used in medical imaging, remote sensing, and computer vision to compare images effectively.</p>
+        <p>
+            <strong>Image registration</strong> is the process of aligning two or more images of the same scene 
+            (or of comparable subjects) taken at different times, viewpoints, or by different imaging sensors. 
+            By determining an appropriate spatial transformation that best aligns corresponding features or regions, 
+            it becomes possible to compare or combine these images effectively. 
+            In <em>medical imaging</em>, registration enables the fusion of data from multiple modalities (e.g., MRI, CT, PET) 
+            to better visualize complex anatomy or disease progression. 
+            In <em>remote sensing</em>, it allows change detection over time by comparing satellite images of the same location. 
+            And in <em>computer vision</em>, it is fundamental for tasks like panoramic stitching or object tracking.
+        </p>
 
+        <!-- 2. WHY IS IMAGE REGISTRATION IMPORTANT? -->
         <h2>Why is Image Registration Important?</h2>
-        <p>Image registration is crucial for:</p>
+        <p>
+            Image registration is critical in a variety of fields that require consistent spatial alignment of images:
+        </p>
         <ul>
-            <li><strong>Medical Imaging:</strong> Aligning images from different modalities (MRI, CT, PET) for diagnosis.</li>
-            <li><strong>Change Detection:</strong> Monitoring structural changes over time in remote sensing.</li>
-            <li><strong>Computer Vision:</strong> Stitching images in panoramic views and object tracking.</li>
-            <li><strong>Augmented Reality:</strong> Aligning virtual objects with real-world views.</li>
+            <li>
+                <strong>Medical Imaging:</strong><br>
+                Aligning scans from different modalities (e.g., CT and MRI) or different time points helps clinicians track disease evolution, plan treatments, and enhance diagnostic clarity.
+            </li>
+            <li>
+                <strong>Change Detection:</strong><br>
+                In remote sensing, continuous observation of the same region over time can reveal deforestation, urban development, or disaster impact.
+            </li>
+            <li>
+                <strong>Computer Vision:</strong><br>
+                Tasks such as <em>panorama stitching</em>, <em>camera calibration</em>, and <em>object tracking</em> all rely on robust alignment of images or frames.
+            </li>
+            <li>
+                <strong>Augmented Reality (AR):</strong><br>
+                Superimposing virtual objects accurately onto live camera feeds requires precise alignment to real-world environments.
+            </li>
         </ul>
 
+        <!-- 3. TYPES OF IMAGE REGISTRATION -->
         <h2>Types of Image Registration</h2>
-        <p>There are various types of image registration methods based on transformation models:</p>
-        
+        <p>
+            Image registration methods often differ based on the kind of <em>transformation model</em> they assume for aligning images. 
+            These transformations can be rigid, affine, or non-rigid (deformable), depending on how much flexibility is needed:
+        </p>
+
+        <!-- 3.1 RIGID REGISTRATION -->
         <h3>1. Rigid Registration</h3>
-        <p>Rigid registration involves only rotation and translation, preserving the shape of objects.</p>
+        <p>
+            <strong>Rigid registration</strong> allows only rotations and translations, preserving the shape and size of objects. 
+            It is often used in situations where the underlying structures are not expected to deform or change in scale:
+        </p>
         <ul>
-            <li>Used in brain imaging where anatomical structures remain unchanged.</li>
-            <li>Transformation: \( T(x) = Rx + t \)</li>
+            <li>
+                Commonly used in brain imaging where the skull imposes rigid constraints (though local deformations still occur in soft tissue, they are often small).
+            </li>
+            <li>
+                Transformation model: \( T(\mathbf{x}) = R\mathbf{x} + \mathbf{t} \), where \( R \) is a rotation matrix and \( \mathbf{t} \) is a translation vector.
+            </li>
         </ul>
 
+        <!-- 3.2 AFFINE REGISTRATION -->
         <h3>2. Affine Registration</h3>
-        <p>Affine registration includes scaling, rotation, translation, and shearing, maintaining parallel lines but allowing changes in scale.</p>
+        <p>
+            <strong>Affine registration</strong> extends rigid transformations by including scaling and shearing. 
+            Parallel lines remain parallel, but lengths and angles can change:
+        </p>
         <ul>
-            <li>Common in remote sensing and biomedical applications.</li>
-            <li>Transformation: \( T(x) = Ax + t \)</li>
+            <li>
+                Frequently used in remote sensing for satellite image alignment or in biomedical applications where uniform scaling might be required.
+            </li>
+            <li>
+                Transformation model: \( T(\mathbf{x}) = A\mathbf{x} + \mathbf{t} \), where \( A \) is a 2×2 or 3×3 matrix representing rotation, scale, and shear.
+            </li>
         </ul>
 
+        <!-- 3.3 NON-RIGID (DEFORMABLE) REGISTRATION -->
         <h3>3. Non-Rigid (Deformable) Registration</h3>
-        <p>Non-rigid registration allows local deformations to align flexible objects.</p>
+        <p>
+            <strong>Non-rigid registration</strong> allows complex, localized deformations, making it essential for aligning soft tissues or objects that can bend, stretch, or compress:
+        </p>
         <ul>
-            <li>Used in applications like organ deformation tracking in medical imaging.</li>
-            <li>Transformation: Complex functions or splines.</li>
+            <li>
+                Common in <em>organ tracking</em> for radiotherapy or surgical planning, where tissues can move or deform significantly.
+            </li>
+            <li>
+                Transformation model: may use spline-based approaches (e.g., B-splines) or free-form deformation fields, significantly increasing computational complexity.
+            </li>
         </ul>
 
+        <!-- 4. IMAGE REGISTRATION TECHNIQUES -->
         <h2>Image Registration Techniques</h2>
-        <p>The commonly used techniques for image registration include:</p>
+        <p>
+            There are two primary paradigms for image registration: 
+            <strong>feature-based methods</strong> and <strong>intensity-based methods</strong>. 
+            Additionally, <strong>optical flow</strong> techniques are often used for motion tracking in sequential imagery.
+        </p>
 
+        <!-- 4.1 FEATURE-BASED REGISTRATION -->
         <h3>1. Feature-Based Registration</h3>
-        <p>Identifies key points (e.g., corners, edges) and matches them between images.</p>
+        <p>
+            <strong>Feature-based registration</strong> relies on identifying distinct features (keypoints, corners, edges) in each image and then matching them 
+            to compute the transformation that aligns these features as closely as possible. 
+            This approach is often preferred when the images have sufficient texture or when different imaging modalities produce substantially different intensity patterns.
+        </p>
         <ul>
-            <li><strong>Scale-Invariant Feature Transform (SIFT):</strong> Detects and describes keypoints invariant to scale and rotation.</li>
-            <li><strong>Speeded-Up Robust Features (SURF):</strong> Faster alternative to SIFT with similar robustness.</li>
-            <li><strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Efficient keypoint detection and matching.</li>
+            <li>
+                <strong>SIFT (Scale-Invariant Feature Transform):</strong> Robust to scale and rotation, but computationally heavy.
+            </li>
+            <li>
+                <strong>SURF (Speeded-Up Robust Features):</strong> Faster than SIFT, with similar invariances.
+            </li>
+            <li>
+                <strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Patent-free alternative to SIFT/SURF, well-suited for real-time applications.
+            </li>
         </ul>
 
+        <!-- Code Tabs: Python and MATLAB (ORB) -->
         <div class="code-tabs">
             <div class="code-tab active" onclick="switchCode('python-orb')">Python</div>
             <div class="code-tab" onclick="switchCode('matlab-orb')">MATLAB</div>
@@ -72,10 +141,10 @@
 import cv2
 
 # Load two images
-image1 = cv2.imread('image1.jpg', 0)
-image2 = cv2.imread('image2.jpg', 0)
+image1 = cv2.imread('image1.jpg', cv2.IMREAD_GRAYSCALE)
+image2 = cv2.imread('image2.jpg', cv2.IMREAD_GRAYSCALE)
 
-# Detect ORB keypoints and descriptors
+# Detect ORB keypoints and compute descriptors
 orb = cv2.ORB_create()
 kp1, des1 = orb.detectAndCompute(image1, None)
 kp2, des2 = orb.detectAndCompute(image2, None)
@@ -84,8 +153,12 @@ kp2, des2 = orb.detectAndCompute(image2, None)
 bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 matches = bf.match(des1, des2)
 
-# Draw matches
-matched_img = cv2.drawMatches(image1, kp1, image2, kp2, matches[:50], None)
+# Sort matches by distance (best first)
+matches = sorted(matches, key=lambda x: x.distance)
+
+# Draw top matches
+matched_img = cv2.drawMatches(image1, kp1, image2, kp2, matches[:50], None,
+                              flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 cv2.imwrite('matched_image.jpg', matched_img)
             </pre>
         </div>
@@ -118,16 +191,32 @@ title('Putative matches using ORB features');
             </pre>
         </div>
 
+        <!-- 4.2 INTENSITY-BASED REGISTRATION -->
         <h3>2. Intensity-Based Registration</h3>
-        <p>Directly compares pixel intensities using optimization techniques.</p>
+        <p>
+            <strong>Intensity-based registration</strong> (a.k.a. <em>direct</em> or <em>voxel-based registration</em>) 
+            compares raw pixel intensities or intensity distributions to find the transformation that maximizes a similarity measure. 
+            This method is common in multi-modal medical imaging, where structures may have distinct intensities in different scans:
+        </p>
         <ul>
-            <li><strong>Mutual Information:</strong> Measures statistical dependence between images.</li>
-            <li><strong>Normalized Cross-Correlation:</strong> Compares image similarity in overlapping regions.</li>
+            <li>
+                <strong>Mutual Information (MI):</strong> Measures statistical dependence or information overlap between images, 
+                making it robust for multi-modal alignment (e.g., MRI-CT).
+            </li>
+            <li>
+                <strong>Normalized Cross-Correlation (NCC):</strong> Useful for mono-modal registration, matching intensity patterns in overlapping regions.
+            </li>
         </ul>
 
+        <!-- 4.3 OPTICAL FLOW -->
         <h3>3. Optical Flow</h3>
-        <p>Estimates pixel motion between frames in sequences, widely used in video processing.</p>
-        
+        <p>
+            <strong>Optical flow</strong> estimates the per-pixel motion between consecutive frames in a sequence (often used in video), 
+            but it can also be interpreted for registration in two images that capture slight changes or movement. 
+            Algorithms like <em>Lucas–Kanade</em> or <em>Farneback</em> compute velocity fields that indicate how pixels have shifted between frames.
+        </p>
+
+        <!-- Code Tabs: Python and MATLAB (Optical Flow) -->
         <div class="code-tabs">
             <div class="code-tab active" onclick="switchCode('python-optical')">Python</div>
             <div class="code-tab" onclick="switchCode('matlab-optical')">MATLAB</div>
@@ -135,18 +224,29 @@ title('Putative matches using ORB features');
 
         <div id="python-optical" class="code-block active">
             <pre>
-# Optical flow calculation using the Farneback method
-flow = cv2.calcOpticalFlowFarneback(image1, image2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+import cv2
+
+# Load consecutive frames (grayscale)
+prev_frame = cv2.imread('frame1.jpg', cv2.IMREAD_GRAYSCALE)
+curr_frame = cv2.imread('frame2.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Calculate Farneback optical flow
+flow = cv2.calcOpticalFlowFarneback(prev_frame, curr_frame, None,
+                                    pyr_scale=0.5, levels=3, winsize=15,
+                                    iterations=3, poly_n=5, poly_sigma=1.2,
+                                    flags=0)
+
+# flow[:,:,0] and flow[:,:,1] contain the horizontal and vertical flow
             </pre>
         </div>
 
         <div id="matlab-optical" class="code-block">
             <pre>
-% Optical flow calculation using the Farneback method
+% Optical flow calculation using the Farneback method in MATLAB
 
 % Read images
-image1 = imread('image1.jpg');
-image2 = imread('image2.jpg');
+image1 = imread('frame1.jpg');
+image2 = imread('frame2.jpg');
 gray1 = rgb2gray(image1);
 gray2 = rgb2gray(image2);
 
@@ -158,32 +258,69 @@ flow1 = estimateFlow(opticFlow, gray1);
 % Estimate flow for the second image
 flow2 = estimateFlow(opticFlow, gray2);
 
-% The flow vectors are in flow2.Vx and flow2.Vy
+% flow2.Vx and flow2.Vy give the motion fields between gray1 and gray2
             </pre>
         </div>
 
+        <!-- 5. APPLICATIONS OF IMAGE REGISTRATION -->
         <h2>Applications of Image Registration</h2>
+        <p>
+            Image registration is vital in domains requiring spatial alignment for subsequent tasks:
+        </p>
         <ul>
-            <li><strong>Medical Diagnosis:</strong> Combining images from different modalities for better diagnosis.</li>
-            <li><strong>Remote Sensing:</strong> Aligning satellite images for environmental monitoring.</li>
-            <li><strong>Panorama Stitching:</strong> Creating wide-field views by merging overlapping images.</li>
-            <li><strong>Motion Analysis:</strong> Tracking changes in surveillance applications.</li>
+            <li>
+                <strong>Medical Diagnosis:</strong><br>
+                Fusing imaging data from CT, MRI, and PET scans to provide a comprehensive view of patient anatomy and pathologies.
+            </li>
+            <li>
+                <strong>Remote Sensing:</strong><br>
+                Aligning satellite images over time to detect environmental changes, such as deforestation or glacier melting.
+            </li>
+            <li>
+                <strong>Panorama Stitching:</strong><br>
+                Combining multiple overlapping photos into a single, wider field-of-view image—often used in mobile phone camera apps.
+            </li>
+            <li>
+                <strong>Motion Analysis:</strong><br>
+                Tracking shifts in surveillance footage or sports performance analysis by aligning frames over time.
+            </li>
         </ul>
 
+        <!-- 6. CHALLENGES IN IMAGE REGISTRATION -->
         <h2>Challenges in Image Registration</h2>
-        <p>Despite its wide applications, image registration faces challenges such as:</p>
+        <p>
+            Although registration methods are well-studied, practical deployment often faces several difficulties:
+        </p>
         <ul>
-            <li><strong>Noise and Artifacts:</strong> Presence of noise can affect feature detection.</li>
-            <li><strong>Computational Complexity:</strong> Non-rigid registration can be computationally expensive.</li>
-            <li><strong>Multi-Modal Data:</strong> Aligning images from different imaging techniques can be difficult.</li>
+            <li>
+                <strong>Noise and Artifacts:</strong><br>
+                Medical scans or satellite images might contain noise, motion artifacts, or partial occlusions, making feature detection and matching less reliable.
+            </li>
+            <li>
+                <strong>Computational Complexity:</strong><br>
+                Non-rigid or 3D registrations can be computationally intensive, requiring parallel computation or specialized hardware.
+            </li>
+            <li>
+                <strong>Multi-Modal Data:</strong><br>
+                Different imaging modalities produce dissimilar intensity patterns (e.g., ultrasound vs. CT), requiring advanced similarity metrics (e.g., Mutual Information).
+            </li>
+            <li>
+                <strong>User Expertise:</strong><br>
+                In clinical or geospatial contexts, selecting the right technique (e.g., rigid vs. deformable) and tuning parameters can require domain-specific expertise.
+            </li>
         </ul>
 
+        <!-- 7. FURTHER LEARNING RESOURCES -->
         <h2>Further Learning Resources</h2>
+        <p>
+            To explore image registration and alignment techniques in more depth, consult these resources:
+        </p>
         <ul>
-            <li><a href="https://docs.opencv.org/">OpenCV Documentation</a></li>
-            <li><a href="https://www.slicer.org/">3D Slicer - Medical Image Registration</a></li>
-            <li><a href="https://scikit-image.org/">scikit-image - Image Processing in Python</a></li>
-            <li><a href="https://en.wikipedia.org/wiki/Image_registration">Image Registration (Wikipedia)</a></li>
+            <li><a href="https://docs.opencv.org/">OpenCV Documentation</a> – Detailed references on feature-based registration, homography estimation, and more.</li>
+            <li><a href="https://www.slicer.org/">3D Slicer</a> – A free, open-source platform for medical image analysis, including various registration modules.</li>
+            <li><a href="https://scikit-image.org/">scikit-image</a> – Python library that offers intensity-based registration tools, optical flow, and more.</li>
+            <li><a href="https://en.wikipedia.org/wiki/Image_registration">Image Registration (Wikipedia)</a> – An overview and links to research literature and specialized methods.</li>
+            <li><em>Medical Image Registration</em> by Hajnal et al. – A specialized textbook covering mathematical concepts, algorithms, and clinical applications.</li>
         </ul>
     </div>
 
