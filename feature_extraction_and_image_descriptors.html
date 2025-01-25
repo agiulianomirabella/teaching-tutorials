@@ -41,7 +41,13 @@
             <li><strong>Sobel Operator:</strong> Computes gradient magnitude and direction.</li>
             <li><strong>Canny Edge Detector:</strong> A multi-step approach to detect strong and weak edges.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('edge-detection-python')">Python</div>
+            <div class="code-tab" onclick="switchCode('edge-detection-matlab')">MATLAB</div>
+        </div>
+
+        <div id="edge-detection-python" class="code-block active">
+            <pre>
 import cv2
 
 # Load image
@@ -50,7 +56,18 @@ image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
 # Apply Canny edge detection
 edges = cv2.Canny(image, 50, 150)
 cv2.imwrite('edges.jpg', edges)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="edge-detection-matlab" class="code-block">
+            <pre>
+% MATLAB code for edge detection
+I = imread('image.jpg');
+Igray = rgb2gray(I);
+edges = edge(Igray, 'Canny', [0.1 0.3]);
+imwrite(edges, 'edges.jpg');
+            </pre>
+        </div>
 
         <h3>2. Texture Analysis</h3>
         <p>Texture features capture the structural patterns in an image.</p>
@@ -58,14 +75,34 @@ cv2.imwrite('edges.jpg', edges)
             <li><strong>Gray Level Co-occurrence Matrix (GLCM):</strong> Measures spatial relationships of pixel intensities.</li>
             <li><strong>Local Binary Patterns (LBP):</strong> Encodes texture based on neighborhood pixel intensity differences.</li>
         </ul>
-        <pre>
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('glcm-python')">Python</div>
+            <div class="code-tab" onclick="switchCode('glcm-matlab')">MATLAB</div>
+        </div>
+
+        <div id="glcm-python" class="code-block active">
+            <pre>
 from skimage.feature import graycomatrix, graycoprops
 
 # Compute GLCM
 glcm = graycomatrix(image, [1], [0], 256, symmetric=True, normed=True)
 contrast = graycoprops(glcm, 'contrast')[0, 0]
 print("Contrast:", contrast)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="glcm-matlab" class="code-block">
+            <pre>
+% MATLAB code for computing GLCM
+I = imread('image.jpg');
+Igray = rgb2gray(I);
+offsets = [0 1];
+glcm = graycomatrix(Igray, 'Offset', offsets, 'Symmetric', true);
+stats = graycoprops(glcm, 'Contrast');
+contrast = stats.Contrast;
+disp(['Contrast: ', num2str(contrast)]);
+            </pre>
+        </div>
 
         <h3>3. Shape Descriptors</h3>
         <p>Shape features provide information about the geometry of objects in an image.</p>
@@ -73,12 +110,45 @@ print("Contrast:", contrast)
             <li><strong>Contours:</strong> Extract object boundaries.</li>
             <li><strong>Hu Moments:</strong> Used for shape recognition.</li>
         </ul>
-        <pre>
+        
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('contours-python')">Python</div>
+            <div class="code-tab" onclick="switchCode('contours-matlab')">MATLAB</div>
+        </div>
+
+        <div id="contours-python" class="code-block active">
+            <pre>
 # Find contours
 contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cv2.drawContours(image, contours, -1, (0,255,0), 2)
 cv2.imwrite('contours.jpg', image)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="contours-matlab" class="code-block">
+            <pre>
+% MATLAB code for finding contours
+I = imread('image.jpg');
+Igray = rgb2gray(I);
+BW = imbinarize(Igray);
+BW = imfill(BW, 'holes');
+boundaries = bwboundaries(BW, 'noholes');
+
+Ioverlay = I;
+
+for k = 1:length(boundaries)
+    boundary = boundaries{k};
+    for n = 1:size(boundary, 1)
+        row = boundary(n,1);
+        col = boundary(n,2);
+        % Draw in green
+        Ioverlay(row, col, :) = [0, 255, 0];
+    end
+end
+
+imwrite(Ioverlay, 'contours.jpg');
+            </pre>
+        </div>
 
         <h3>4. Keypoint Detection and Matching</h3>
         <p>Keypoints are distinctive image points useful for matching and tracking objects across images.</p>
@@ -87,13 +157,35 @@ cv2.imwrite('contours.jpg', image)
             <li><strong>SURF (Speeded-Up Robust Features):</strong> Faster version of SIFT.</li>
             <li><strong>ORB (Oriented FAST and Rotated BRIEF):</strong> Efficient and fast keypoint detector.</li>
         </ul>
-        <pre>
+
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('orb-python')">Python</div>
+            <div class="code-tab" onclick="switchCode('orb-matlab')">MATLAB</div>
+        </div>
+
+        <div id="orb-python" class="code-block active">
+            <pre>
 # ORB keypoint detection
 orb = cv2.ORB_create()
 keypoints, descriptors = orb.detectAndCompute(image, None)
 output = cv2.drawKeypoints(image, keypoints, None)
 cv2.imwrite('keypoints.jpg', output)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="orb-matlab" class="code-block">
+            <pre>
+% MATLAB code for ORB keypoint detection
+I = imread('image.jpg');
+Igray = rgb2gray(I);
+points = detectORBFeatures(Igray);
+[features, validPoints] = extractFeatures(Igray, points);
+
+% Create an output image showing keypoints
+output = insertMarker(I, validPoints.Location, 'circle', 'Color', 'red');
+imwrite(output, 'keypoints.jpg');
+            </pre>
+        </div>
 
         <h3>5. Color Descriptors</h3>
         <p>Color-based features are widely used in content-based image retrieval (CBIR) applications.</p>
@@ -101,11 +193,32 @@ cv2.imwrite('keypoints.jpg', output)
             <li><strong>Color Histograms:</strong> Represent the distribution of colors in an image.</li>
             <li><strong>Color Moments:</strong> Statistical moments used to describe color distribution.</li>
         </ul>
-        <pre>
+
+        <div class="code-tabs">
+            <div class="code-tab active" onclick="switchCode('hist-python')">Python</div>
+            <div class="code-tab" onclick="switchCode('hist-matlab')">MATLAB</div>
+        </div>
+
+        <div id="hist-python" class="code-block active">
+            <pre>
 # Compute color histogram
 hist = cv2.calcHist([image], [0], None, [256], [0,256])
 cv2.normalize(hist, hist)
-        </pre>
+            </pre>
+        </div>
+
+        <div id="hist-matlab" class="code-block">
+            <pre>
+% MATLAB code for color histogram
+I = imread('image.jpg');
+% Convert to grayscale if it's a color image
+if size(I,3) == 3
+    I = rgb2gray(I);
+end
+counts = imhist(I, 256);
+counts = counts / sum(counts); % normalize
+            </pre>
+        </div>
 
         <h2>Applications of Feature Extraction</h2>
         <ul>
@@ -135,5 +248,8 @@ cv2.normalize(hist, hist)
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
     </footer>
+    
+    <script src="script.js"></script>
+
 </body>
 </html>
