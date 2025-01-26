@@ -301,54 +301,60 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         <h2>Interactive Demos</h2>
         <p>
             Below are live demos illustrating some key global transformations—geometric, intensity, and frequency-domain—directly in the browser.
-            Click each section to expand and interact with the sliders.
         </p>
 
         <!-- 10.1: Geometric Transformations Demo -->
         <div class="demo-toggle" onclick="toggleDemo('demo-geometric')">
-            <strong>Geometric Transformations Demo (Click to Expand/Collapse)</strong>
+            <strong>Geometric Transformations</strong>
         </div>
         <div id="demo-geometric" class="demo-content">
             <p>Use the sliders to rotate, scale, and translate the image.</p>
             <label>
               Rotation (degrees): 
               <input type="range" id="rotation" min="0" max="360" value="0" />
+              <span id="rotationValue">0</span>
             </label>
             <br />
             <label>
               Scale: 
               <input type="range" id="scale" min="10" max="200" value="100" />
+              <span id="scaleValue">100</span>
             </label>
             <br />
             <label>
               Translate X: 
               <input type="range" id="translateX" min="-200" max="200" value="0" />
+              <span id="translateXValue">0</span>
             </label>
             <br />
             <label>
-              Translate Y: 
+              Translate Y:
               <input type="range" id="translateY" min="-200" max="200" value="0" />
+              <span id="translateYValue">0</span>
             </label>
             <canvas id="canvasGeometric" width="600" height="400"></canvas>
         </div>
 
         <!-- 10.2: Intensity Transformations Demo -->
         <div class="demo-toggle" onclick="toggleDemo('demo-intensity')">
-            <strong>Intensity Transformations Demo (Click to Expand/Collapse)</strong>
+            <strong>Intensity Transformations</strong>
         </div>
         <div id="demo-intensity" class="demo-content">
             <p>Adjust brightness, contrast, or apply thresholding to convert the image into black and white.</p>
             <div class="slider-group">
               <label for="brightness">Brightness:</label>
               <input type="range" id="brightness" min="-100" max="100" value="0" />
+              <span id="brightnessValue">0</span>
             </div>
             <div class="slider-group">
               <label for="contrast">Contrast:</label>
               <input type="range" id="contrast" min="0" max="200" value="100" />
+              <span id="contrastValue">0</span>
             </div>
             <div class="slider-group">
               <label for="threshold">Threshold (0–255):</label>
               <input type="range" id="threshold" min="0" max="255" value="128" />
+              <span id="thresholdValue">128</span>
               <input type="checkbox" id="applyThreshold"/> <span>Apply threshold</span>
             </div>
             <canvas id="canvasIntensity" width="640" height="426"></canvas>
@@ -356,7 +362,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
         <!-- 10.3: Frequency Domain Demo -->
         <div class="demo-toggle" onclick="toggleDemo('demo-frequency')">
-            <strong>Frequency Domain Demo (Click to Expand/Collapse)</strong>
+            <strong>Frequency Domain</strong>
         </div>
         <div id="demo-frequency" class="demo-content">
             <p>
@@ -365,6 +371,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
             </p>
             <label for="cutoff">Cutoff Frequency (% of max):</label>
             <input type="range" id="cutoff" min="1" max="100" value="20"/>
+            <span id="cutoffValue">20</span>
             <br />
             <!-- Two canvases: one hidden for input, one for output -->
             <canvas id="canvasFreqInput" style="display:none;"></canvas>
@@ -392,7 +399,13 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         const scaleInput     = document.getElementById("scale");
         const translateXInput= document.getElementById("translateX");
         const translateYInput= document.getElementById("translateY");
-    
+
+        // Controls trackers
+        const rotationValueTracker = document.getElementById('rotationValue');
+        const scaleValueTracker = document.getElementById('scaleValue');
+        const translateXValueTracker = document.getElementById('translateXValue');
+        const translateYValueTracker = document.getElementById('translateYValue');
+        
         // Load an example image
         imgGeom = new Image();
         imgGeom.src = "image1.jpeg";
@@ -413,6 +426,12 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           const scaleVal    = parseFloat(scaleInput.value) / 100;
           const translateX  = parseFloat(translateXInput.value);
           const translateY  = parseFloat(translateYInput.value);
+
+          // Update trackers values
+          rotationValueTracker.textContent = rotationDeg;
+          scaleValueTracker.textContent = scaleVal;
+          translateXValueTracker.textContent = translateX;
+          translateYValueTracker.textContent = translateY;
     
           // Move origin to canvas center
           ctxGeom.save();
@@ -444,6 +463,10 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         const thresholdInput     = document.getElementById("threshold");
         const applyThresholdCheckbox = document.getElementById("applyThreshold");
     
+        const brightnessValueTracker    = document.getElementById("brightnessValue");
+        const contrastValueTracker      = document.getElementById("contrastValue");
+        const thresholdValueTracker     = document.getElementById("thresholdValue");
+
         imgInt = new Image();
         imgInt.src = "image1.jpeg";
     
@@ -465,7 +488,12 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           const contrastVal  = parseInt(contrastInput.value);
           const threshold    = parseInt(thresholdInput.value);
           const applyThresh  = applyThresholdCheckbox.checked;
-    
+
+          // Update trackers values
+          brightnessValueTracker.textContent = brightness;
+          contrastValueTracker.textContent = contrastVal;
+          thresholdValueTracker.textContent = threshold;
+
           let imageData = ctxInt.getImageData(0, 0, canvasInt.width, canvasInt.height);
           let data = imageData.data;
     
@@ -756,6 +784,9 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       const cutoffSlider  = document.getElementById("cutoff");
       const imageSrc      = "image1.jpeg"; // adjust path if needed
 
+      // Define the tracker
+      const cutoffValueTracker  = document.getElementById("cutoffValue");
+
       const freqImg = new Image();
       freqImg.src = imageSrc;
 
@@ -782,6 +813,9 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
       function applyFrequencyFilter() {
           const cutoffVal = parseInt(cutoffSlider.value);
+
+          // Update the tracker
+          cutoffValueTracker.textContent = cutoffVal;
         
           // 1) Extract grayscale from the input canvas
           const ctxIn = canvasFreqIn.getContext("2d");
