@@ -706,82 +706,81 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
       function applyFrequencyFilter() {
         const cutoffVal = parseInt(cutoffSlider.value);
-
+    
         // 1) Extract grayscale from the input canvas
         const ctxIn = canvasFreqIn.getContext("2d");
         const { width, height } = canvasFreqIn;
         const imageData = ctxIn.getImageData(0, 0, width, height);
         const data = imageData.data;
-
-        // Create 2D arrays for real/imag. We'll keep it the same size as the original.
+    
         let real2D = new Array(height);
         let imag2D = new Array(height);
         for (let r = 0; r < height; r++) {
-          real2D[r] = new Array(width).fill(0);
-          imag2D[r] = new Array(width).fill(0);
+            real2D[r] = new Array(width).fill(0);
+            imag2D[r] = new Array(width).fill(0);
         }
-
+    
         // Convert to grayscale
-        // data is [R, G, B, A, R, G, B, A, ...]
-        // We'll store the gray values in the real2D array
         for (let i = 0, r = 0; r < height; r++) {
-          for (let c = 0; c < width; c++, i += 4) {
-            let gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
-            real2D[r][c] = gray;
-            imag2D[r][c] = 0;
-          }
+            for (let c = 0; c < width; c++, i += 4) {
+                let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+                real2D[r][c] = gray;
+                imag2D[r][c] = 0;
+            }
         }
-
+    
         // 2) Perform FFT
         fft2D(real2D, imag2D);
-
-        // 3) Shift so that (0,0) frequency is at the center
+    
+        // 3) Shift frequency components
         fftShift2D(real2D, imag2D);
-
-        // 4) Build and apply a circular low-pass mask
+    
+        // 4) Apply a circular low-pass filter
         const radius = (cutoffVal / 100) * (Math.min(width, height) / 2);
         const centerR = Math.floor(height / 2);
         const centerC = Math.floor(width / 2);
-
+    
         for (let r = 0; r < height; r++) {
-          for (let c = 0; c < width; c++) {
-            let dist = Math.sqrt(Math.pow(r - centerR, 2) + Math.pow(c - centerC, 2));
-            if (dist > radius) {
-              // Zero out frequencies outside the cutoff
-              real2D[r][c] = 0;
-              imag2D[r][c] = 0;
+            for (let c = 0; c < width; c++) {
+                let dist = Math.sqrt(Math.pow(r - centerR, 2) + Math.pow(c - centerC, 2));
+                if (dist > radius) {
+                    real2D[r][c] = 0;
+                    imag2D[r][c] = 0;
+                }
             }
-          }
         }
-
-        // 5) Shift back before inverse
+    
+        // 5) Shift back before inverse FFT
         fftShift2D(real2D, imag2D);
-
-        // 6) Perform iFFT
+    
+        // 6) Perform inverse FFT
         ifft2D(real2D, imag2D);
-
-        // 7) Convert back to 8-bit image data
-        const outCanvas = document.getElementById("canvasFreqOutput");
-        const ctxOut = outCanvas.getContext("2d");
+    
+        // -------------------------------
+        // Add the normalization step here
+        // -------------------------------
+        const minVal = Math.min(...real2D.flat());
+        const maxVal = Math.max(...real2D.flat());
+    
+        const ctxOut = canvasFreqOut.getContext("2d");
         const outData = ctxOut.createImageData(width, height);
-
+    
         for (let r = 0; r < height; r++) {
-          for (let c = 0; c < width; c++) {
-            let val = real2D[r][c];
-            // clamp to [0..255]
-            val = Math.min(255, Math.max(0, val));
-            let idx = (r * width + c) * 4;
-            outData.data[idx]   = val;  // R
-            outData.data[idx+1] = val;  // G
-            outData.data[idx+2] = val;  // B
-            outData.data[idx+3] = 255;  // A
-          }
+            for (let c = 0; c < width; c++) {
+                let val = real2D[r][c];
+                val = ((val - minVal) / (maxVal - minVal)) * 255;  // Normalize to [0,255]
+                val = Math.round(val);
+                outData.data[(r * width + c) * 4] = val;
+                outData.data[(r * width + c) * 4 + 1] = val;
+                outData.data[(r * width + c) * 4 + 2] = val;
+                outData.data[(r * width + c) * 4 + 3] = 255;  // Full opacity
+            }
         }
-
-        // 8) Draw filtered image
+    
+        // 7) Draw the normalized image to output canvas
         ctxOut.putImageData(outData, 0, 0);
-      }
     }
+
 
     // Kick it off
     initFrequencyDemo();
