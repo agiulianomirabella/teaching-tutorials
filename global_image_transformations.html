@@ -364,13 +364,13 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
                 Move the “Cutoff Frequency” slider to see how it removes (or retains) high-frequency details.
             </p>
             <label for="cutoff">Cutoff Frequency (% of max):</label>
-            <input type="range" id="cutoff" min="0" max="100" value="50"/>
+            <input type="range" id="cutoff" min="0" max="100" value="20"/>
             <br />
             <!-- Two canvases: one hidden for input, one for output -->
             <canvas id="canvasFreqInput" style="display:none;"></canvas>
             <canvas id="canvasFreqOutput"></canvas>
         </div>
-    </div> <!-- /.container -->
+    </div>
 
     <footer>
         <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agiulianomirabella">GitHub</a></p>
@@ -779,7 +779,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     
         // 7) Draw the normalized image to output canvas
         ctxOut.putImageData(outData, 0, 0);
-    }
+      }
     }
 
     // Kick it off
