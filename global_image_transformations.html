@@ -774,7 +774,12 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         const flattened = real2D.flat();
         const minVal = flattened.reduce((min, val) => Math.min(min, val), Infinity);
         const maxVal = flattened.reduce((max, val) => Math.max(max, val), -Infinity);
-    
+        
+        if (minVal === maxVal) {
+          console.error("Normalization error: min and max values are equal.");
+          return;
+        }
+
         const ctxOut = canvasFreqOut.getContext("2d");
         const outData = ctxOut.createImageData(width, height);
     
@@ -792,6 +797,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     
         // 7) Draw the normalized image to output canvas
         ctxOut.putImageData(outData, 0, 0);
+        console.log(`Grayscale value at (0,0): ${real2D[0][0]}`);
       }
     }
 
@@ -800,9 +806,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
 
     // Expose helper functions on window:
     window.toggleDemo = toggleDemo;
-
-    console.log(`Grayscale value at (0,0): ${real2D[0][0]}`);
-
     </script>
 </body>
 </html>
