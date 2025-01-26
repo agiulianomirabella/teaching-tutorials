@@ -507,123 +507,287 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         }
       }
     
-      /*****************************************************************
-       * 3) FREQUENCY DOMAIN DEMO (requires OpenCV.js)
-       *****************************************************************/
-    function onOpenCvReady() {
-        console.log('OpenCV.js is ready');
-        cv['onRuntimeInitialized'] = () => {
-          console.log('OpenCV runtime initialized');
-                
-          let srcMat, canvasFreqIn, canvasFreqOut;
-          if (document.getElementById("canvasFreqInput")) {
-            canvasFreqIn = document.getElementById("canvasFreqInput");
-            canvasFreqOut= document.getElementById("canvasFreqOutput");
-    
-            let cutoffSlider = document.getElementById("cutoff");
-    
-            const freqImg = new Image();
-            freqImg.src = "image1.jpeg";
-    
-            freqImg.onload = function() {
-                console.log("Image loaded successfully:", freqImg.width, freqImg.height);
-                
-                canvasFreqIn.width  = freqImg.width;
-                canvasFreqIn.height = freqImg.height;
-                canvasFreqOut.width = freqImg.width;
-                canvasFreqOut.height= freqImg.height;
-                
-                let ctxFreqIn = canvasFreqIn.getContext("2d");
-                ctxFreqIn.drawImage(freqImg, 0, 0);
-                
-                // Read image into OpenCV Mat
-                srcMat = cv.imread(canvasFreqIn);
-                
-                if (srcMat.empty()) {
-                    console.error("Error: Failed to load image to OpenCV matrix.");
-                    return;
-                }
-            
-                // Convert image to RGBA to avoid length issues
-                let rgbaMat = new cv.Mat();
-                cv.cvtColor(srcMat, rgbaMat, cv.COLOR_RGB2RGBA);
-                var imgData = new ImageData(new Uint8ClampedArray(rgbaMat.data), rgbaMat.cols, rgbaMat.rows);
-                rgbaMat.delete();  // Cleanup memory
-            
-                applyFrequencyFilter();
-            };
+    /*****************************************************************
+    * 3) FREQUENCY DOMAIN DEMO
+    *****************************************************************/
+    // -------------------------------------------
+    // 1D FFT Implementation (Cooley-Tukey)
+    // -------------------------------------------
+    // Returns two arrays: [Re[], Im[]]
+    function fft1D(real, imag) {
+      const n = real.length;
+      if (n <= 1) return [real, imag];
 
-            freqImg.onerror = function() {
-                console.error("Error loading image. Check the path and network.");
-            };
-    
-            // Listen for slider changes
-            cutoffSlider.addEventListener("input", applyFrequencyFilter);
-    
-            function applyFrequencyFilter() {
-              if (!srcMat || !cv || !cv.Mat) return;
-              let cutoffVal = parseInt(cutoffSlider.value);
-    
-              let grayMat = new cv.Mat();
-              cv.cvtColor(srcMat, grayMat, cv.COLOR_RGBA2GRAY);
-    
-              // Convert to 32F
-              let floatMat = new cv.Mat();
-              grayMat.convertTo(floatMat, cv.CV_32FC1);
-    
-              // DFT
-              let dftMat = new cv.Mat();
-              cv.dft(floatMat, dftMat, cv.DFT_COMPLEX_OUTPUT);
-    
-              // Build mask for low-pass
-              let rows = dftMat.rows, cols = dftMat.cols;
-              let radius = (cutoffVal / 100) * (Math.min(rows, cols) / 2);
-    
-              let mask = new cv.Mat.zeros(rows, cols, dftMat.type());
-              for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                  let dist = Math.sqrt(Math.pow(r - rows/2, 2) + Math.pow(c - cols/2, 2));
-                  if (dist < radius) {
-                    // Set real=1, imag=1 in mask
-                    mask.floatPtr(r, c)[0] = 1.0;
-                    mask.floatPtr(r, c)[1] = 1.0;
-                  }
-                }
-              }
-              // Multiply
-              cv.multiply(dftMat, mask, dftMat);
-    
-              // IDFT
-              let idftMat = new cv.Mat();
-              cv.idft(dftMat, idftMat, cv.DFT_REAL_OUTPUT + cv.DFT_SCALE);
-    
-              // Convert to 8U
-              let outMat = new cv.Mat();
-              idftMat.convertTo(outMat, cv.CV_8UC1);
-    
-              // Display
-              cv.imshow("canvasFreqOutput", outMat);
-    
-              // Cleanup
-              grayMat.delete();
-              floatMat.delete();
-              dftMat.delete();
-              mask.delete();
-              idftMat.delete();
-              outMat.delete();
+      // Bit-reversal permutation
+      let j = 0;
+      for (let i = 0; i < n; i++) {
+        if (i < j) {
+          [real[i], real[j]] = [real[j], real[i]];
+          [imag[i], imag[j]] = [imag[j], imag[i]];
+        }
+        let m = n >> 1;
+        while (j >= m && m > 0) {
+          j -= m;
+          m >>= 1;
+        }
+        j += m;
+      }
+
+      // Cooley-Tukey
+      for (let size = 2; size <= n; size <<= 1) {
+        const halfsize = size >> 1;
+        const tablestep = (2 * Math.PI) / size;
+        for (let i = 0; i < n; i += size) {
+          for (let k = 0; k < halfsize; k++) {
+            const angle = tablestep * k;
+            const wr = Math.cos(angle);
+            const wi = -Math.sin(angle);
+            const re = real[i + k + halfsize];
+            const im = imag[i + k + halfsize];
+            const tr = wr * re - wi * im;
+            const ti = wr * im + wi * re;
+            real[i + k + halfsize] = real[i + k] - tr;
+            imag[i + k + halfsize] = imag[i + k] - ti;
+            real[i + k] += tr;
+            imag[i + k] += ti;
+          }
+        }
+      }
+
+      return [real, imag];
+    }
+
+    // -------------------------------------------
+    // 1D Inverse FFT
+    // -------------------------------------------
+    // iFFT( Re[], Im[] ) => Normalized in place
+    function ifft1D(real, imag) {
+      // Conjugate
+      for (let i = 0; i < real.length; i++) {
+        imag[i] = -imag[i];
+      }
+      // Forward FFT
+      [real, imag] = fft1D(real, imag);
+      // Conjugate again
+      for (let i = 0; i < real.length; i++) {
+        real[i] = real[i] / real.length;
+        imag[i] = -imag[i] / real.length;
+      }
+      return [real, imag];
+    }
+
+    // -------------------------------------------
+    // 2D FFT using 1D transform
+    // -------------------------------------------
+    function fft2D(real2D, imag2D) {
+      // real2D and imag2D are 2D arrays of the same size
+      const rows = real2D.length;
+      const cols = real2D[0].length;
+
+      // 1) FFT each row
+      for (let r = 0; r < rows; r++) {
+        const rowReal = real2D[r].slice();
+        const rowImag = imag2D[r].slice();
+        const [rowRealOut, rowImagOut] = fft1D(rowReal, rowImag);
+        real2D[r] = rowRealOut;
+        imag2D[r] = rowImagOut;
+      }
+
+      // 2) FFT each column
+      for (let c = 0; c < cols; c++) {
+        let colReal = new Array(rows);
+        let colImag = new Array(rows);
+        for (let r = 0; r < rows; r++) {
+          colReal[r] = real2D[r][c];
+          colImag[r] = imag2D[r][c];
+        }
+        const [colRealOut, colImagOut] = fft1D(colReal, colImag);
+        // put data back
+        for (let r = 0; r < rows; r++) {
+          real2D[r][c] = colRealOut[r];
+          imag2D[r][c] = colImagOut[r];
+        }
+      }
+    }
+
+    // -------------------------------------------
+    // 2D Inverse FFT
+    // -------------------------------------------
+    function ifft2D(real2D, imag2D) {
+      const rows = real2D.length;
+      const cols = real2D[0].length;
+
+      // iFFT each row
+      for (let r = 0; r < rows; r++) {
+        const [rowRealOut, rowImagOut] = ifft1D(real2D[r].slice(), imag2D[r].slice());
+        real2D[r] = rowRealOut;
+        imag2D[r] = rowImagOut;
+      }
+
+      // iFFT each column
+      for (let c = 0; c < cols; c++) {
+        let colReal = new Array(rows);
+        let colImag = new Array(rows);
+        for (let r = 0; r < rows; r++) {
+          colReal[r] = real2D[r][c];
+          colImag[r] = imag2D[r][c];
+        }
+        const [colRealOut, colImagOut] = ifft1D(colReal, colImag);
+        for (let r = 0; r < rows; r++) {
+          real2D[r][c] = colRealOut[r];
+          imag2D[r][c] = colImagOut[r];
+        }
+      }
+    }
+
+    // -------------------------------------------
+    // Helper to shift the origin of the FFT
+    // (so that frequency=0 is in the center)
+    // -------------------------------------------
+    function fftShift2D(real2D, imag2D) {
+      const rows = real2D.length;
+      const cols = real2D[0].length;
+      const halfRows = Math.floor(rows / 2);
+      const halfCols = Math.floor(cols / 2);
+
+      // Swap quadrants: top-left <-> bottom-right, top-right <-> bottom-left
+      for (let r = 0; r < halfRows; r++) {
+        for (let c = 0; c < halfCols; c++) {
+          // swap (r,c) with (r+halfRows, c+halfCols)
+          let r2 = r + halfRows;
+          let c2 = c + halfCols;
+          [real2D[r][c], real2D[r2][c2]] = [real2D[r2][c2], real2D[r][c]];
+          [imag2D[r][c], imag2D[r2][c2]] = [imag2D[r2][c2], imag2D[r][c]];
+        }
+      }
+      for (let r = 0; r < halfRows; r++) {
+        for (let c = halfCols; c < cols; c++) {
+          // swap (r,c) with (r+halfRows, c-halfCols)
+          let r2 = r + halfRows;
+          let c2 = c - halfCols;
+          [real2D[r][c], real2D[r2][c2]] = [real2D[r2][c2], real2D[r][c]];
+          [imag2D[r][c], imag2D[r2][c2]] = [imag2D[r2][c2], imag2D[r][c]];
+        }
+      }
+    }
+
+    // -------------------------------------------
+    // Main Demo
+    // -------------------------------------------
+    function initFrequencyDemo() {
+      const canvasFreqIn  = document.getElementById("canvasFreqInput");
+      const canvasFreqOut = document.getElementById("canvasFreqOutput");
+      const cutoffSlider  = document.getElementById("cutoff");
+      const imageSrc      = "image1.jpeg"; // adjust path if needed
+
+      const freqImg = new Image();
+      freqImg.src = imageSrc;
+
+      freqImg.onload = function() {
+        canvasFreqIn.width  = freqImg.width;
+        canvasFreqIn.height = freqImg.height;
+        canvasFreqOut.width = freqImg.width;
+        canvasFreqOut.height= freqImg.height;
+
+        // Draw image to input canvas
+        const ctxIn = canvasFreqIn.getContext("2d");
+        ctxIn.drawImage(freqImg, 0, 0);
+
+        // Listen for slider changes
+        cutoffSlider.addEventListener("input", applyFrequencyFilter);
+
+        // Initial filter application
+        applyFrequencyFilter();
+      };
+
+      freqImg.onerror = function() {
+        console.error("Error loading image. Check the path and network.");
+      };
+
+      function applyFrequencyFilter() {
+        const cutoffVal = parseInt(cutoffSlider.value);
+
+        // 1) Extract grayscale from the input canvas
+        const ctxIn = canvasFreqIn.getContext("2d");
+        const { width, height } = canvasFreqIn;
+        const imageData = ctxIn.getImageData(0, 0, width, height);
+        const data = imageData.data;
+
+        // Create 2D arrays for real/imag. We'll keep it the same size as the original.
+        let real2D = new Array(height);
+        let imag2D = new Array(height);
+        for (let r = 0; r < height; r++) {
+          real2D[r] = new Array(width).fill(0);
+          imag2D[r] = new Array(width).fill(0);
+        }
+
+        // Convert to grayscale
+        // data is [R, G, B, A, R, G, B, A, ...]
+        // We'll store the gray values in the real2D array
+        for (let i = 0, r = 0; r < height; r++) {
+          for (let c = 0; c < width; c++, i += 4) {
+            let gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+            real2D[r][c] = gray;
+            imag2D[r][c] = 0;
+          }
+        }
+
+        // 2) Perform FFT
+        fft2D(real2D, imag2D);
+
+        // 3) Shift so that (0,0) frequency is at the center
+        fftShift2D(real2D, imag2D);
+
+        // 4) Build and apply a circular low-pass mask
+        const radius = (cutoffVal / 100) * (Math.min(width, height) / 2);
+        const centerR = Math.floor(height / 2);
+        const centerC = Math.floor(width / 2);
+
+        for (let r = 0; r < height; r++) {
+          for (let c = 0; c < width; c++) {
+            let dist = Math.sqrt(Math.pow(r - centerR, 2) + Math.pow(c - centerC, 2));
+            if (dist > radius) {
+              // Zero out frequencies outside the cutoff
+              real2D[r][c] = 0;
+              imag2D[r][c] = 0;
             }
           }
-        };
+        }
+
+        // 5) Shift back before inverse
+        fftShift2D(real2D, imag2D);
+
+        // 6) Perform iFFT
+        ifft2D(real2D, imag2D);
+
+        // 7) Convert back to 8-bit image data
+        const outCanvas = document.getElementById("canvasFreqOutput");
+        const ctxOut = outCanvas.getContext("2d");
+        const outData = ctxOut.createImageData(width, height);
+
+        for (let r = 0; r < height; r++) {
+          for (let c = 0; c < width; c++) {
+            let val = real2D[r][c];
+            // clamp to [0..255]
+            val = Math.min(255, Math.max(0, val));
+            let idx = (r * width + c) * 4;
+            outData.data[idx]   = val;  // R
+            outData.data[idx+1] = val;  // G
+            outData.data[idx+2] = val;  // B
+            outData.data[idx+3] = 255;  // A
+          }
+        }
+
+        // 8) Draw filtered image
+        ctxOut.putImageData(outData, 0, 0);
+      }
     }
 
-    function onOpenCvError() {
-        console.error('Failed to load OpenCV.js');
-    }
+    // Kick it off
+    initFrequencyDemo();
 
     // Expose helper functions on window:
     window.toggleDemo = toggleDemo;
     </script>
-    <!-- <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady()" onerror="onOpenCvError()"></script> -->
-    <script src="opencv.js" onload="onOpenCvReady()" onerror="onOpenCvError()"></script>
 </body>
 </html>
