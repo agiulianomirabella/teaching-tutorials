@@ -364,7 +364,7 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
                 Move the “Cutoff Frequency” slider to see how it removes (or retains) high-frequency details.
             </p>
             <label for="cutoff">Cutoff Frequency (% of max):</label>
-            <input type="range" id="cutoff" min="0" max="100" value="20"/>
+            <input type="range" id="cutoff" min="1" max="100" value="20"/>
             <br />
             <!-- Two canvases: one hidden for input, one for output -->
             <canvas id="canvasFreqInput" style="display:none;"></canvas>
@@ -886,8 +886,6 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           canvasFreqOut.width  = oldWidth;  // Make sure dimensions match
           canvasFreqOut.height = oldHeight;
           ctxOut.putImageData(outData, 0, 0);
-        
-          console.log(`Grayscale value at (0,0): ${real2DUnpad[0][0]}`);
         }
     }
 
