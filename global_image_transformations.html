@@ -651,6 +651,70 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         }
       }
     }
+    
+    /********************************************************
+     * Helper #1: Find Next Power of Two
+     ********************************************************/
+    function nextPowerOfTwo(n) {
+      let p = 1;
+      while (p < n) {
+        p <<= 1; // p = p * 2
+      }
+      return p;
+    }
+    
+    /********************************************************
+     * Helper #2: Zero‐Pad a 2D Array to Power‐of‐Two Size
+     ********************************************************/
+    function zeroPad2D(real2D, imag2D) {
+      const oldHeight = real2D.length;
+      const oldWidth  = real2D[0].length;
+    
+      // Find new padded dimensions (nearest power of 2 for each dimension)
+      const newHeight = nextPowerOfTwo(oldHeight);
+      const newWidth  = nextPowerOfTwo(oldWidth);
+    
+      // Create new 2D arrays filled with 0
+      let real2DPad = new Array(newHeight);
+      let imag2DPad = new Array(newHeight);
+      for (let r = 0; r < newHeight; r++) {
+        real2DPad[r] = new Array(newWidth).fill(0);
+        imag2DPad[r] = new Array(newWidth).fill(0);
+      }
+    
+      // Copy original data into the top‐left corner
+      for (let r = 0; r < oldHeight; r++) {
+        for (let c = 0; c < oldWidth; c++) {
+          real2DPad[r][c] = real2D[r][c];
+          imag2DPad[r][c] = imag2D[r][c];
+        }
+      }
+    
+      // Return the new padded arrays + the original dimensions
+      return {
+        real2DPad,
+        imag2DPad,
+        oldHeight,
+        oldWidth,
+        newHeight,
+        newWidth
+      };
+    }
+    
+    /********************************************************
+     * Helper #3: Unpad a 2D Array Back to Original Size
+     ********************************************************/
+    function unpad2D(real2DPad, imag2DPad, oldHeight, oldWidth) {
+      let real2D = new Array(oldHeight);
+      let imag2D = new Array(oldHeight);
+    
+      for (let r = 0; r < oldHeight; r++) {
+        real2D[r] = real2DPad[r].slice(0, oldWidth);
+        imag2D[r] = imag2DPad[r].slice(0, oldWidth);
+      }
+    
+      return { real2D, imag2D };
+    }
 
     // -------------------------------------------
     // Helper to shift the origin of the FFT
@@ -717,88 +781,114 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
       };
 
       function applyFrequencyFilter() {
-        const cutoffVal = parseInt(cutoffSlider.value);
-    
-        // 1) Extract grayscale from the input canvas
-        const ctxIn = canvasFreqIn.getContext("2d");
-        const { width, height } = canvasFreqIn;
-        const imageData = ctxIn.getImageData(0, 0, width, height);
-        const data = imageData.data;
-    
-        let real2D = new Array(height);
-        let imag2D = new Array(height);
-        for (let r = 0; r < height; r++) {
+          const cutoffVal = parseInt(cutoffSlider.value);
+        
+          // 1) Extract grayscale from the input canvas
+          const ctxIn = canvasFreqIn.getContext("2d");
+          const { width, height } = canvasFreqIn;  // Original image size
+          const imageData = ctxIn.getImageData(0, 0, width, height);
+          const data = imageData.data;
+        
+          // Create real2D, imag2D of EXACT (width x height)
+          let real2D = new Array(height);
+          let imag2D = new Array(height);
+          for (let r = 0; r < height; r++) {
             real2D[r] = new Array(width).fill(0);
             imag2D[r] = new Array(width).fill(0);
-        }
-    
-        // Convert to grayscale
-        for (let i = 0, r = 0; r < height; r++) {
-            for (let c = 0; c < width; c++, i += 4) {
-                let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-                real2D[r][c] = gray;
-                imag2D[r][c] = 0;
-            }
-        }
-    
-        // 2) Perform FFT
-        fft2D(real2D, imag2D);
-    
-        // 3) Shift frequency components
-        fftShift2D(real2D, imag2D);
-    
-        // 4) Apply a circular low-pass filter
-        const radius = (cutoffVal / 100) * (Math.min(width, height) / 2);
-        const centerR = Math.floor(height / 2);
-        const centerC = Math.floor(width / 2);
-    
-        for (let r = 0; r < height; r++) {
-            for (let c = 0; c < width; c++) {
-                let dist = Math.sqrt(Math.pow(r - centerR, 2) + Math.pow(c - centerC, 2));
-                if (dist > radius) {
-                    real2D[r][c] = 0;
-                    imag2D[r][c] = 0;
-                }
-            }
-        }
-    
-        // 5) Shift back before inverse FFT
-        fftShift2D(real2D, imag2D);
-    
-        // 6) Perform inverse FFT
-        ifft2D(real2D, imag2D);
-    
-        // -------------------------------
-        // Add the normalization step here
-        // -------------------------------
-        const flattened = real2D.flat();
-        const minVal = flattened.reduce((min, val) => Math.min(min, val), Infinity);
-        const maxVal = flattened.reduce((max, val) => Math.max(max, val), -Infinity);
+          }
         
-        if (minVal === maxVal) {
-          console.error("Normalization error: min and max values are equal.");
-          return;
-        }
-
-        const ctxOut = canvasFreqOut.getContext("2d");
-        const outData = ctxOut.createImageData(width, height);
-    
-        for (let r = 0; r < height; r++) {
-            for (let c = 0; c < width; c++) {
-                let val = real2D[r][c];
-                val = ((val - minVal) / (maxVal - minVal)) * 255;  // Normalize to [0,255]
-                val = Math.round(val);
-                outData.data[(r * width + c) * 4] = val;
-                outData.data[(r * width + c) * 4 + 1] = val;
-                outData.data[(r * width + c) * 4 + 2] = val;
-                outData.data[(r * width + c) * 4 + 3] = 255;  // Full opacity
+          // Convert RGBA => grayscale
+          for (let i = 0, r = 0; r < height; r++) {
+            for (let c = 0; c < width; c++, i += 4) {
+              let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+              real2D[r][c] = gray;
+              imag2D[r][c] = 0;
             }
+          }
+        
+          /********************************************************
+           * A) ZERO‐PAD: real2DPad, imag2DPad
+           ********************************************************/
+          const {
+            real2DPad,
+            imag2DPad,
+            oldHeight,
+            oldWidth,
+            newHeight,
+            newWidth
+          } = zeroPad2D(real2D, imag2D);
+        
+          // B) Perform 2D FFT on the *padded* arrays
+          fft2D(real2DPad, imag2DPad);
+        
+          // C) Shift frequency components to center
+          fftShift2D(real2DPad, imag2DPad);
+        
+          // D) Apply circular low‐pass filter
+          const radius   = (cutoffVal / 100) * (Math.min(newWidth, newHeight) / 2);
+          const centerR  = Math.floor(newHeight / 2);
+          const centerC  = Math.floor(newWidth / 2);
+        
+          for (let r = 0; r < newHeight; r++) {
+            for (let c = 0; c < newWidth; c++) {
+              let dist = Math.sqrt((r - centerR) ** 2 + (c - centerC) ** 2);
+              if (dist > radius) {
+                real2DPad[r][c] = 0;
+                imag2DPad[r][c] = 0;
+              }
+            }
+          }
+        
+          // E) Shift back before iFFT
+          fftShift2D(real2DPad, imag2DPad);
+        
+          // F) Perform inverse FFT on padded arrays
+          ifft2D(real2DPad, imag2DPad);
+        
+          /********************************************************
+           * G) UNPAD: restore (height x width)
+           ********************************************************/
+          const { real2D: real2DUnpad, imag2D: imag2DUnpad } =
+            unpad2D(real2DPad, imag2DPad, oldHeight, oldWidth);
+        
+          // H) Normalize the unpadded real2D array to [0,255]
+          //    (Use real2DUnpad for grayscale output)
+          let flattened = real2DUnpad.flat();
+          let minVal = flattened.reduce((m, v) => Math.min(m, v), Infinity);
+          let maxVal = flattened.reduce((m, v) => Math.max(m, v), -Infinity);
+        
+          if (minVal === maxVal) {
+            console.error("Normalization error: all values are the same.");
+            return;
+          }
+        
+          const ctxOut = canvasFreqOut.getContext("2d");
+          const outData = ctxOut.createImageData(oldWidth, oldHeight);
+        
+          let idx = 0;
+          for (let r = 0; r < oldHeight; r++) {
+            for (let c = 0; c < oldWidth; c++) {
+              let val = real2DUnpad[r][c];
+              // Normalize to [0..255]
+              val = ((val - minVal) / (maxVal - minVal)) * 255;
+              val = Math.round(val);
+        
+              outData.data[idx]     = val;  // R
+              outData.data[idx + 1] = val;  // G
+              outData.data[idx + 2] = val;  // B
+              outData.data[idx + 3] = 255;  // A
+              idx += 4;
+            }
+          }
+        
+          // I) Draw the result to the output canvas
+          //    (We keep the same original size canvas)
+          canvasFreqOut.width  = oldWidth;  // Make sure dimensions match
+          canvasFreqOut.height = oldHeight;
+          ctxOut.putImageData(outData, 0, 0);
+        
+          console.log(`Grayscale value at (0,0): ${real2DUnpad[0][0]}`);
         }
-    
-        // 7) Draw the normalized image to output canvas
-        ctxOut.putImageData(outData, 0, 0);
-        console.log(`Grayscale value at (0,0): ${real2D[0][0]}`);
-      }
     }
 
     // Kick it off
