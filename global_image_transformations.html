@@ -771,8 +771,9 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         // -------------------------------
         // Add the normalization step here
         // -------------------------------
-        const minVal = Math.min(...real2D.flat());
-        const maxVal = Math.max(...real2D.flat());
+        const flattened = real2D.flat();
+        const minVal = flattened.reduce((min, val) => Math.min(min, val), Infinity);
+        const maxVal = flattened.reduce((max, val) => Math.max(max, val), -Infinity);
     
         const ctxOut = canvasFreqOut.getContext("2d");
         const outData = ctxOut.createImageData(width, height);
