@@ -560,12 +560,24 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
     // -------------------------------------------
     // 1D Inverse FFT
     // -------------------------------------------
+
+    function padToPowerOfTwo(arr) {
+      const n = arr.length;
+      const nextPow2 = Math.pow(2, Math.ceil(Math.log2(n)));
+      if (n < nextPow2) {
+        arr = arr.concat(new Array(nextPow2 - n).fill(0));
+      }
+      return arr;
+    }
+
     // iFFT( Re[], Im[] ) => Normalized in place
     function ifft1D(real, imag) {
       // Conjugate
       for (let i = 0; i < real.length; i++) {
         imag[i] = -imag[i];
       }
+      real = padToPowerOfTwo(real);
+      imag = padToPowerOfTwo(imag);
       // Forward FFT
       [real, imag] = fft1D(real, imag);
       // Conjugate again
