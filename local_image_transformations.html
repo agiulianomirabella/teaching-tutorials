@@ -343,11 +343,504 @@ imwrite(closed, 'closed.jpg');
             <li><a href="https://www.kaggle.com/datasets">Kaggle - Image Processing Datasets</a> - Public datasets for experimentation</li>
             <li><em>Digital Image Processing</em> by Gonzalez & Woods - Foundational text on filtering, morphology, and more</li>
         </ul>
+        <h2>Local Image Transformations</h2>
+        <p>Below are live demos illustrating some key local transformations—smoothing, sharpening, edge detection, and morphological operations—directly in the browser.</p>
+        
+        <div class="demo-toggle" onclick="toggleDemo('demo-smooth-sharpen')">
+            <strong>Smoothing &amp; Sharpening Demo (Click to Expand/Collapse)</strong>
+        </div>
+        
+      <div id="demo-smooth-sharpen" class="demo-content">
+        <p>
+          This demo applies a simple <strong>box blur (smoothing)</strong> and/or a <strong>sharpen filter</strong> to the image.
+          Adjust the sliders below to see the effect. The kernel size determines how large the neighborhood for the blur is.
+        </p>
+        <div class="slider-group">
+          <input type="checkbox" id="applySmoothing" checked> 
+          <label for="applySmoothing">Apply Smoothing (Box Blur)</label>
+        </div>
+        <div class="slider-group">
+          <label for="kernelSize">Kernel Size:</label>
+          <input type="range" id="kernelSize" min="1" max="15" value="3">
+          <span id="kernelSizeValue">3</span>
+        </div>
+        <div class="slider-group">
+          <input type="checkbox" id="applySharpen"> 
+          <label for="applySharpen">Apply Sharpen</label>
+        </div>
+        <div class="slider-group">
+          <label for="sharpenAmount">Sharpen Strength:</label>
+          <input type="range" id="sharpenAmount" min="0" max="5" value="1" step="0.1">
+          <span id="sharpenValue">1.0</span>
+        </div>
+        <canvas id="canvasSmoothSharpen" width="600" height="400"></canvas>
+      </div>
+    
+      <div class="demo-toggle" onclick="toggleDemo('demo-edge')">
+        <strong>Edge Detection Demo (Click to Expand/Collapse)</strong>
+      </div>
+      <div id="demo-edge" class="demo-content">
+        <p>
+          This demo applies a simple <strong>Sobel operator</strong> to detect edges and then optionally thresholds the result. 
+          Adjust the threshold slider to binarize the edges.
+        </p>
+        <div class="slider-group">
+          <label for="edgeThreshold">Edge Threshold (0-255):</label>
+          <input type="range" id="edgeThreshold" min="0" max="255" value="100">
+          <span id="edgeThresholdValue">100</span>
+          <input type="checkbox" id="applyEdgeThreshold">
+          <label for="applyEdgeThreshold">Apply threshold</label>
+        </div>
+        <canvas id="canvasEdge" width="600" height="400"></canvas>
+      </div>
+    
+      <div class="demo-toggle" onclick="toggleDemo('demo-morph')">
+        <strong>Morphological Operations Demo (Click to Expand/Collapse)</strong>
+      </div>
+      <div id="demo-morph" class="demo-content">
+        <p>
+          This demo first converts the image to binary (using a threshold), then applies either <strong>erosion</strong> or <strong>dilation</strong> using a 
+          square structuring element. Move the sliders or switch the operation to see how it affects the binary image.
+        </p>
+        <div class="slider-group">
+          <label for="binaryThreshold">Binarize Threshold (0-255):</label>
+          <input type="range" id="binaryThreshold" min="0" max="255" value="128">
+          <span id="binaryThresholdValue">128</span>
+        </div>
+        <div>
+          <input type="radio" name="morphOp" id="morphErode" value="erode" checked>
+          <label for="morphErode">Erode</label>
+          <input type="radio" name="morphOp" id="morphDilate" value="dilate">
+          <label for="morphDilate">Dilate</label>
+        </div>
+        <div class="slider-group">
+          <label for="morphKernel">Struct. Elem. Size:</label>
+          <input type="range" id="morphKernel" min="1" max="15" value="3">
+          <span id="morphKernelValue">3</span>
+        </div>
+        <canvas id="canvasMorph" width="600" height="400"></canvas>
+      </div>
+    
+      <img id="sourceImage" src="image1.jpg" style="display:none;" />
     </div>
 
     <footer>
-        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agiulianomirabella">GitHub</a></p>
     </footer>
     <script src="script.js"></script>
+    <script>
+        /************************************************************************
+         * GENERAL SETUP: LOADING THE IMAGE
+         ************************************************************************/
+        const sourceImg = document.getElementById('sourceImage');
+        sourceImg.onload = function() {
+          // Once the image is loaded, initialize all demos.
+          initSmoothSharpenDemo();
+          initEdgeDemo();
+          initMorphDemo();
+        };
+    
+        // Helper to toggle the "demo-content" visibility
+        function toggleDemo(id) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    
+        /************************************************************************
+         * 1) SMOOTHING (BOX BLUR) & SHARPENING DEMO
+         ************************************************************************/
+        function initSmoothSharpenDemo() {
+          const canvas = document.getElementById('canvasSmoothSharpen');
+          const ctx = canvas.getContext('2d');
+    
+          // Draw the source image onto the canvas
+          canvas.width = sourceImg.width;
+          canvas.height = sourceImg.height;
+          ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height);
+    
+          // We'll store the "original" image data so we can re-filter from scratch each time
+          const originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+          // Sliders and checkboxes
+          const applySmoothing = document.getElementById('applySmoothing');
+          const kernelSizeSlider = document.getElementById('kernelSize');
+          const kernelSizeValue = document.getElementById('kernelSizeValue');
+          const applySharpen = document.getElementById('applySharpen');
+          const sharpenAmountSlider = document.getElementById('sharpenAmount');
+          const sharpenValue = document.getElementById('sharpenValue');
+    
+          // Whenever a parameter changes, re-apply
+          [applySmoothing, kernelSizeSlider, applySharpen, sharpenAmountSlider].forEach(elem => {
+            elem.addEventListener('input', applyFilters);
+          });
+    
+          function applyFilters() {
+            // Show current slider values
+            kernelSizeValue.textContent = kernelSizeSlider.value;
+            sharpenValue.textContent = sharpenAmountSlider.value;
+    
+            // Start by copying the original pixels
+            ctx.putImageData(originalImageData, 0, 0);
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let pixels = imageData.data;
+    
+            // 1) Smoothing (Box Blur) if checked
+            if (applySmoothing.checked) {
+              const size = parseInt(kernelSizeSlider.value, 10);
+              pixels = boxBlur(pixels, canvas.width, canvas.height, size);
+            }
+    
+            // 2) Sharpening if checked
+            if (applySharpen.checked) {
+              const amount = parseFloat(sharpenAmountSlider.value);
+              pixels = sharpen(pixels, canvas.width, canvas.height, amount);
+            }
+    
+            // Put final result back
+            const outImageData = new ImageData(pixels, canvas.width, canvas.height);
+            ctx.putImageData(outImageData, 0, 0);
+          }
+    
+          // Immediately apply with default settings
+          applyFilters();
+        }
+    
+        /**
+         * Simple Box Blur
+         * @param {Uint8ClampedArray} inputPixels RGBA pixel data
+         * @param {number} width 
+         * @param {number} height 
+         * @param {number} kernelSize Odd integer recommended
+         * @returns {Uint8ClampedArray} new RGBA pixel data
+         */
+        function boxBlur(inputPixels, width, height, kernelSize) {
+          const outputPixels = new Uint8ClampedArray(inputPixels.length);
+          const half = Math.floor(kernelSize / 2);
+    
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+    
+              let rSum = 0, gSum = 0, bSum = 0;
+              let count = 0;
+    
+              // Sum up the neighboring pixels
+              for (let ky = -half; ky <= half; ky++) {
+                for (let kx = -half; kx <= half; kx++) {
+                  const ny = y + ky;
+                  const nx = x + kx;
+                  if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const idx = (ny * width + nx) * 4;
+                    rSum += inputPixels[idx];
+                    gSum += inputPixels[idx + 1];
+                    bSum += inputPixels[idx + 2];
+                    count++;
+                  }
+                }
+              }
+    
+              const outIdx = (y * width + x) * 4;
+              outputPixels[outIdx] = rSum / count;
+              outputPixels[outIdx + 1] = gSum / count;
+              outputPixels[outIdx + 2] = bSum / count;
+              outputPixels[outIdx + 3] = 255; // fully opaque
+            }
+          }
+    
+          return outputPixels;
+        }
+    
+        /**
+         * Simple Sharpen filter
+         * We use a 3x3 kernel with adjustable center weight
+         * Base kernel (amount=1) is:
+         * [  0, -1,  0 ]
+         * [ -1,  5, -1 ]
+         * [  0, -1,  0 ]
+         * The 'amount' parameter adjusts the center from 5 up/down.
+         */
+        function sharpen(inputPixels, width, height, amount=1.0) {
+          const outputPixels = new Uint8ClampedArray(inputPixels.length);
+          // Weighted kernel:
+          const kernel = [
+            0, -1, 0,
+            -1, 5 * amount, -1,
+            0, -1, 0
+          ];
+          const side = 3;
+          const half = Math.floor(side / 2);
+    
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              let rAcc = 0, gAcc = 0, bAcc = 0;
+    
+              for (let ky = -half; ky <= half; ky++) {
+                for (let kx = -half; kx <= half; kx++) {
+                  const ny = y + ky;
+                  const nx = x + kx;
+                  const kIndex = (ky + half) * side + (kx + half);
+    
+                  if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const idx = (ny * width + nx) * 4;
+                    rAcc += inputPixels[idx] * kernel[kIndex];
+                    gAcc += inputPixels[idx + 1] * kernel[kIndex];
+                    bAcc += inputPixels[idx + 2] * kernel[kIndex];
+                  }
+                }
+              }
+    
+              const outIdx = (y * width + x) * 4;
+              outputPixels[outIdx] = clamp(rAcc);
+              outputPixels[outIdx + 1] = clamp(gAcc);
+              outputPixels[outIdx + 2] = clamp(bAcc);
+              outputPixels[outIdx + 3] = 255;
+            }
+          }
+    
+          return outputPixels;
+        }
+    
+        /************************************************************************
+         * 2) EDGE DETECTION (SOBEL) DEMO
+         ************************************************************************/
+        function initEdgeDemo() {
+          const canvas = document.getElementById('canvasEdge');
+          const ctx = canvas.getContext('2d');
+    
+          canvas.width = sourceImg.width;
+          canvas.height = sourceImg.height;
+          ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height);
+    
+          const originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+          const edgeThresholdSlider = document.getElementById('edgeThreshold');
+          const edgeThresholdValue = document.getElementById('edgeThresholdValue');
+          const applyEdgeThreshold = document.getElementById('applyEdgeThreshold');
+    
+          [edgeThresholdSlider, applyEdgeThreshold].forEach(el => {
+            el.addEventListener('input', applyEdgeDetection);
+          });
+    
+          function applyEdgeDetection() {
+            edgeThresholdValue.textContent = edgeThresholdSlider.value;
+            ctx.putImageData(originalImageData, 0, 0);
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+            let sobelData = sobelOperator(imageData.data, canvas.width, canvas.height);
+            
+            // If threshold is checked, binarize
+            if (applyEdgeThreshold.checked) {
+              const t = parseInt(edgeThresholdSlider.value, 10);
+              sobelData = threshold(sobelData, canvas.width, canvas.height, t);
+            }
+    
+            const outImageData = new ImageData(sobelData, canvas.width, canvas.height);
+            ctx.putImageData(outImageData, 0, 0);
+          }
+    
+          applyEdgeDetection();
+        }
+    
+        /**
+         * Sobel operator to detect edges
+         * We'll produce a grayscale result for edges
+         */
+        function sobelOperator(inputPixels, width, height) {
+          const output = new Uint8ClampedArray(inputPixels.length);
+    
+          // Sobel kernels for X and Y
+          const gx = [-1,0,1, -2,0,2, -1,0,1];
+          const gy = [-1,-2,-1, 0,0,0, 1,2,1];
+          const side = 3;
+          const half = Math.floor(side/2);
+    
+          // Convert to grayscale first to simplify (optional but typical)
+          // We'll do it inline.
+          function grayAt(px, i) {
+            // average
+            return 0.299 * px[i] + 0.587 * px[i+1] + 0.114 * px[i+2];
+          }
+    
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              let sumX = 0;
+              let sumY = 0;
+    
+              for (let ky = -half; ky <= half; ky++) {
+                for (let kx = -half; kx <= half; kx++) {
+                  const ny = y + ky;
+                  const nx = x + kx;
+                  const kIndex = (ky + half) * side + (kx + half);
+    
+                  if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const idx = (ny * width + nx) * 4;
+                    const g = grayAt(inputPixels, idx);
+                    sumX += gx[kIndex] * g;
+                    sumY += gy[kIndex] * g;
+                  }
+                }
+              }
+    
+              const magnitude = Math.sqrt(sumX*sumX + sumY*sumY);
+              const outIdx = (y * width + x) * 4;
+              output[outIdx] = magnitude;
+              output[outIdx + 1] = magnitude;
+              output[outIdx + 2] = magnitude;
+              output[outIdx + 3] = 255;
+            }
+          }
+          return output;
+        }
+    
+        /**
+         * Threshold a grayscale image
+         */
+        function threshold(pixels, width, height, t) {
+          const out = new Uint8ClampedArray(pixels.length);
+          for (let i = 0; i < pixels.length; i += 4) {
+            const val = pixels[i]; // R=G=B for grayscale
+            const bin = (val >= t) ? 255 : 0;
+            out[i] = bin;
+            out[i+1] = bin;
+            out[i+2] = bin;
+            out[i+3] = 255;
+          }
+          return out;
+        }
+    
+        /************************************************************************
+         * 3) MORPHOLOGICAL DEMO
+         ************************************************************************/
+        function initMorphDemo() {
+          const canvas = document.getElementById('canvasMorph');
+          const ctx = canvas.getContext('2d');
+    
+          canvas.width = sourceImg.width;
+          canvas.height = sourceImg.height;
+          ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height);
+    
+          const originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+          const binaryThresholdSlider = document.getElementById('binaryThreshold');
+          const binaryThresholdValue = document.getElementById('binaryThresholdValue');
+          const morphKernelSlider = document.getElementById('morphKernel');
+          const morphKernelValue = document.getElementById('morphKernelValue');
+          const morphErode = document.getElementById('morphErode');
+          const morphDilate = document.getElementById('morphDilate');
+    
+          const inputs = [
+            binaryThresholdSlider, morphKernelSlider,
+            morphErode, morphDilate
+          ];
+    
+          inputs.forEach(el => el.addEventListener('input', applyMorphology));
+    
+          function applyMorphology() {
+            binaryThresholdValue.textContent = binaryThresholdSlider.value;
+            morphKernelValue.textContent = morphKernelSlider.value;
+    
+            // Reset to original
+            ctx.putImageData(originalImageData, 0, 0);
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+            // 1) Convert to grayscale + threshold => binary
+            const t = parseInt(binaryThresholdSlider.value, 10);
+            let binData = threshold(imageData.data, canvas.width, canvas.height, t);
+    
+            // 2) Apply morphological operation
+            const size = parseInt(morphKernelSlider.value, 10);
+            let result;
+            if (morphErode.checked) {
+              result = erode(binData, canvas.width, canvas.height, size);
+            } else {
+              result = dilate(binData, canvas.width, canvas.height, size);
+            }
+    
+            ctx.putImageData(new ImageData(result, canvas.width, canvas.height), 0, 0);
+          }
+    
+          applyMorphology();
+        }
+    
+        /**
+         * Erosion for a binary (0 or 255) image, using a square structuring element.
+         */
+        function erode(pixels, width, height, kernelSize) {
+          const out = new Uint8ClampedArray(pixels.length);
+          const half = Math.floor(kernelSize / 2);
+    
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              // If there's any '0' in the neighborhood, output is '0' (eroded away)
+              let minVal = 255;
+              for (let ky = -half; ky <= half; ky++) {
+                for (let kx = -half; kx <= half; kx++) {
+                  const ny = y + ky;
+                  const nx = x + kx;
+                  if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const idx = (ny * width + nx) * 4;
+                    // For binary images R=G=B, just check the red channel
+                    if (pixels[idx] < minVal) {
+                      minVal = pixels[idx];
+                    }
+                  } else {
+                    // Outside the image, treat it as 0 if you like, 
+                    // but typically you might skip or replicate
+                    minVal = 0;
+                  }
+                }
+              }
+              const outIdx = (y * width + x) * 4;
+              // minVal will be 0 if any neighbor is 0
+              out[outIdx] = minVal;
+              out[outIdx + 1] = minVal;
+              out[outIdx + 2] = minVal;
+              out[outIdx + 3] = 255;
+            }
+          }
+          return out;
+        }
+    
+        /**
+         * Dilation for a binary image, using a square structuring element.
+         */
+        function dilate(pixels, width, height, kernelSize) {
+          const out = new Uint8ClampedArray(pixels.length);
+          const half = Math.floor(kernelSize / 2);
+    
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              // If there's any '255' in the neighborhood, output is '255' (dilated)
+              let maxVal = 0;
+              for (let ky = -half; ky <= half; ky++) {
+                for (let kx = -half; kx <= half; kx++) {
+                  const ny = y + ky;
+                  const nx = x + kx;
+                  if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const idx = (ny * width + nx) * 4;
+                    if (pixels[idx] > maxVal) {
+                      maxVal = pixels[idx];
+                    }
+                  }
+                }
+              }
+              const outIdx = (y * width + x) * 4;
+              out[outIdx] = maxVal;
+              out[outIdx + 1] = maxVal;
+              out[outIdx + 2] = maxVal;
+              out[outIdx + 3] = 255;
+            }
+          }
+          return out;
+        }
+    
+        /************************************************************************
+         * Utility: clamp function for sharpening
+         ************************************************************************/
+        function clamp(val) {
+          return Math.max(0, Math.min(255, val));
+        }
+    
+      </script>
 </body>
 </html>
