@@ -361,11 +361,398 @@ segmented_image = reshape(idx, size(image));
             <li><a href="https://en.wikipedia.org/wiki/Image_segmentation">Image Segmentation (Wikipedia)</a> – A high-level overview and links to research papers.</li>
             <li><em>Digital Image Processing</em> by Gonzalez & Woods – A classic textbook containing fundamental segmentation algorithms and theory.</li>
         </ul>
+
+        <!-- 7. INTERACTIVE DEMOS -->
+        <h2>Interactive Demos</h1>
+        <p>Below are live demos illustrating some key segmentation methods—Thresholding, Region Growing, and basic K-Means Clustering—directly in the browser.</p>
+          <!-- The source image used for segmentation demos -->
+          <img id="sourceSegmentImage" src="image1.jpeg" alt="Source" />
+        
+          <!-- ============== DEMO 1: Threshold Segmentation ============== -->
+          <div class="demo-toggle" onclick="toggleDemo('demo-threshold')">
+            <strong>Threshold-Based Segmentation</strong>
+          </div>
+          <div id="demo-threshold" class="demo-content">
+            <p>
+              This demo shows how a simple global threshold can segment foreground vs. background. 
+              Drag the slider to select a threshold (0-255). All pixels with an intensity above this value will be set to white (foreground), and the rest to black (background).
+            </p>
+            <div class="slider-group">
+              <label for="thresholdValue">Threshold:</label>
+              <input type="range" id="thresholdValue" min="0" max="255" value="128" />
+              <span id="thresholdValueLabel">128</span>
+            </div>
+            <canvas id="canvasThreshold" width="600" height="400"></canvas>
+            <div class="explanation">
+              <strong>How it works:</strong> Each pixel is converted to grayscale by averaging its R, G, and B channels. 
+              If grayscale_intensity &gt; threshold, we set that pixel to white; otherwise black.
+            </div>
+          </div>
+        
+          <!-- ============== DEMO 2: Region Growing ============== -->
+          <div class="demo-toggle" onclick="toggleDemo('demo-region-growing')">
+            <strong>Region Growing Segmentation</strong>
+          </div>
+          <div id="demo-region-growing" class="demo-content">
+            <p>
+              Click on the image to pick a "seed" pixel. The algorithm will expand outwards from that seed, adding neighboring pixels that are within a specified intensity difference. 
+              Use the slider to adjust the tolerance.
+            </p>
+            <div class="slider-group">
+              <label for="regionTolerance">Tolerance:</label>
+              <input type="range" id="regionTolerance" min="1" max="100" value="20" />
+              <span id="regionToleranceLabel">20</span>
+            </div>
+            <canvas id="canvasRegionGrowing" width="600" height="400"></canvas>
+            <div class="explanation">
+              <strong>How it works:</strong> When you click on the canvas, we get the seed pixel’s intensity. We then do a 
+              flood-fill (like BFS or DFS) outwards from that seed, including neighboring pixels whose intensity differs 
+              by less than <em>tolerance</em> from the seed. Those pixels get marked in a distinct color (e.g., red).
+            </div>
+          </div>
+        
+          <!-- ============== DEMO 3: Basic K-Means Clustering ============== -->
+          <div class="demo-toggle" onclick="toggleDemo('demo-kmeans')">
+            <strong>K-Means Segmentation</strong>
+          </div>
+          <div id="demo-kmeans" class="demo-content">
+            <p>
+              The image is segmented into <strong>k</strong> clusters based on color similarity (in RGB space). Use the slider to change the 
+              number of clusters and see how the regions change.
+            </p>
+            <div class="slider-group">
+              <label for="kValue">Number of Clusters (k):</label>
+              <input type="range" id="kValue" min="2" max="8" value="3" />
+              <span id="kValueLabel">3</span>
+            </div>
+            <canvas id="canvasKmeans" width="600" height="400"></canvas>
+            <div class="explanation">
+              <strong>How it works:</strong> We extract each pixel’s (R,G,B) values as a 3D point. K-means tries to find 
+              <em>k</em> centroids in this color space. Each pixel is assigned to the nearest centroid, and we replace 
+              the pixel’s color with the centroid color, resulting in <em>k</em> distinct color regions.
+            </div>  
+        </div>
     </div>
 
     <footer>
-        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agiulianomirabella">GitHub</a></p>
     </footer>
     <script src="script.js"></script>
+      <script>
+        /**************************************************************
+         * 1) ON PAGE LOAD: INITIALIZE ALL DEMOS
+         **************************************************************/
+        const sourceImg = document.getElementById('sourceSegmentImage');
+        sourceImg.onload = function() {
+          // Once the image is loaded, run initialization code for each demo.
+          initThresholdDemo();
+          initRegionGrowingDemo();
+          initKmeansDemo();
+        };
+    
+        // Helper function to toggle the .demo-content visibility
+        function toggleDemo(id) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    
+        /**************************************************************
+         * 2) THRESHOLD SEGMENTATION DEMO
+         *    - We convert each pixel to grayscale.
+         *    - Compare grayscale value to the slider's threshold.
+         *    - If above threshold => white; else => black.
+         **************************************************************/
+        function initThresholdDemo() {
+          const thresholdCanvas = document.getElementById('canvasThreshold');
+          const thresholdCtx = thresholdCanvas.getContext('2d');
+          thresholdCanvas.width = sourceImg.width;
+          thresholdCanvas.height = sourceImg.height;
+    
+          // Draw the source image initially
+          thresholdCtx.drawImage(sourceImg, 0, 0, thresholdCanvas.width, thresholdCanvas.height);
+    
+          // Grab UI elements
+          const thresholdSlider = document.getElementById('thresholdValue');
+          const thresholdLabel = document.getElementById('thresholdValueLabel');
+    
+          // Add event listener to update the threshold
+          thresholdSlider.addEventListener('input', () => {
+            thresholdLabel.textContent = thresholdSlider.value;
+            applyThreshold(thresholdSlider.value);
+          });
+    
+          // Apply threshold to the image
+          function applyThreshold(thValue) {
+            // Get current image data (originally drawn or last updated)
+            const imageData = thresholdCtx.getImageData(0, 0, thresholdCanvas.width, thresholdCanvas.height);
+            const data = imageData.data; // array of [r, g, b, a, r, g, b, a, ...]
+    
+            // Process each pixel
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i+1];
+              const b = data[i+2];
+              // Convert to grayscale (simple average or luminosity method)
+              const gray = Math.round((r + g + b) / 3);
+    
+              // Compare to threshold
+              if (gray > thValue) {
+                data[i] = 255;   // r
+                data[i+1] = 255; // g
+                data[i+2] = 255; // b
+              } else {
+                data[i] = 0;
+                data[i+1] = 0;
+                data[i+2] = 0;
+              }
+            }
+    
+            // Update the canvas
+            thresholdCtx.putImageData(imageData, 0, 0);
+          }
+    
+          // Initialize with default threshold
+          applyThreshold(thresholdSlider.value);
+        }
+    
+        /**************************************************************
+         * 3) REGION GROWING DEMO
+         *    - Convert image to grayscale.
+         *    - On click, pick the seed pixel’s intensity.
+         *    - Perform a flood-fill using BFS or DFS with "tolerance".
+         **************************************************************/
+        function initRegionGrowingDemo() {
+          const regionCanvas = document.getElementById('canvasRegionGrowing');
+          const regionCtx = regionCanvas.getContext('2d');
+          regionCanvas.width = sourceImg.width;
+          regionCanvas.height = sourceImg.height;
+    
+          // Draw the original image onto the canvas
+          regionCtx.drawImage(sourceImg, 0, 0, regionCanvas.width, regionCanvas.height);
+    
+          // We'll maintain a separate buffer of the grayscale data for quick access
+          let grayscaleData = null;
+          // Also store the original image data so we can redraw quickly
+          const originalImageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
+    
+          // Convert the image to grayscale and store it
+          function computeGrayscale() {
+            const tempData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
+            const data = tempData.data;
+            grayscaleData = new Uint8ClampedArray(data.length / 4); // 1 grayscale byte per pixel
+    
+            for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+              const r = data[i];
+              const g = data[i+1];
+              const b = data[i+2];
+              // Simple average
+              grayscaleData[j] = (r + g + b) / 3;
+            }
+          }
+    
+          computeGrayscale();
+    
+          // Tolerance slider
+          const toleranceSlider = document.getElementById('regionTolerance');
+          const toleranceLabel = document.getElementById('regionToleranceLabel');
+          toleranceSlider.addEventListener('input', () => {
+            toleranceLabel.textContent = toleranceSlider.value;
+          });
+    
+          // On canvas click, run region growing from the clicked pixel
+          regionCanvas.addEventListener('click', (evt) => {
+            const rect = regionCanvas.getBoundingClientRect();
+            const x = Math.floor(evt.clientX - rect.left);
+            const y = Math.floor(evt.clientY - rect.top);
+    
+            // Redraw the original image, so we remove any old region highlight
+            regionCtx.putImageData(originalImageData, 0, 0);
+    
+            // Apply region growing
+            const tol = parseInt(toleranceSlider.value, 10);
+            growRegion(x, y, tol);
+          });
+    
+          // BFS region growing
+          function growRegion(seedX, seedY, tolerance) {
+            // We use a queue to implement BFS
+            const queue = [];
+            const visited = new Uint8Array(grayscaleData.length); // track visited pixels (0 or 1)
+    
+            // Get seed intensity
+            const seedIndex = seedY * regionCanvas.width + seedX;
+            const seedIntensity = grayscaleData[seedIndex];
+    
+            // Start BFS
+            queue.push({x: seedX, y: seedY});
+            visited[seedIndex] = 1;
+    
+            // We'll manipulate a new ImageData for the final result
+            const newImageData = regionCtx.getImageData(0, 0, regionCanvas.width, regionCanvas.height);
+            const outputData = newImageData.data;
+    
+            while (queue.length > 0) {
+              const {x, y} = queue.shift();
+              // Mark the pixel in red to highlight the region
+              const idx = (y * regionCanvas.width + x) * 4;
+              outputData[idx] = 255;   // R
+              outputData[idx+1] = 0;   // G
+              outputData[idx+2] = 0;   // B
+              outputData[idx+3] = 255; // A
+    
+              // Check neighbors (4-connectivity: up, down, left, right)
+              const neighbors = [
+                {nx: x,   ny: y-1},
+                {nx: x,   ny: y+1},
+                {nx: x-1, ny: y},
+                {nx: x+1, ny: y}
+              ];
+              for (let n of neighbors) {
+                if (
+                  n.nx >= 0 && n.nx < regionCanvas.width &&
+                  n.ny >= 0 && n.ny < regionCanvas.height
+                ) {
+                  const nIdx = n.ny * regionCanvas.width + n.nx;
+                  if (!visited[nIdx]) {
+                    // Check intensity difference
+                    const intensityDiff = Math.abs(grayscaleData[nIdx] - seedIntensity);
+                    if (intensityDiff <= tolerance) {
+                      visited[nIdx] = 1;
+                      queue.push({x: n.nx, y: n.ny});
+                    }
+                  }
+                }
+              }
+            }
+    
+            // Draw the updated region
+            regionCtx.putImageData(newImageData, 0, 0);
+          }
+        }
+    
+        /**************************************************************
+         * 4) K-MEANS CLUSTERING DEMO
+         *    - Convert each pixel’s (R,G,B) into a 3D point
+         *    - Perform K-means
+         *    - Replace pixel colors with their cluster centroid color
+         **************************************************************/
+        function initKmeansDemo() {
+          const kCanvas = document.getElementById('canvasKmeans');
+          const kCtx = kCanvas.getContext('2d');
+          kCanvas.width = sourceImg.width;
+          kCanvas.height = sourceImg.height;
+    
+          // Draw the source image
+          kCtx.drawImage(sourceImg, 0, 0, kCanvas.width, kCanvas.height);
+    
+          const kSlider = document.getElementById('kValue');
+          const kLabel = document.getElementById('kValueLabel');
+    
+          kSlider.addEventListener('input', () => {
+            kLabel.textContent = kSlider.value;
+            applyKmeans(parseInt(kSlider.value, 10));
+          });
+    
+          // Initialize with default k
+          applyKmeans(parseInt(kSlider.value, 10));
+    
+          function applyKmeans(k) {
+            // Get the current image data
+            const imageData = kCtx.getImageData(0, 0, kCanvas.width, kCanvas.height);
+            const data = imageData.data; // [r, g, b, a, ...]
+    
+            // Convert pixel data into an array of {r, g, b}
+            let points = [];
+            for (let i = 0; i < data.length; i += 4) {
+              points.push({
+                r: data[i],
+                g: data[i+1],
+                b: data[i+2]
+              });
+            }
+    
+            // K-means initialization: pick random centroids
+            let centroids = [];
+            for (let c = 0; c < k; c++) {
+              // random pick from points
+              const randIdx = Math.floor(Math.random() * points.length);
+              centroids.push({
+                r: points[randIdx].r,
+                g: points[randIdx].g,
+                b: points[randIdx].b
+              });
+            }
+    
+            // We'll store the cluster assignment for each point
+            let clusterAssignments = new Array(points.length).fill(0);
+    
+            // Function to find distance between a point and centroid
+            function colorDistance(p, c) {
+              const dr = p.r - c.r;
+              const dg = p.g - c.g;
+              const db = p.b - c.b;
+              return dr*dr + dg*dg + db*db;
+            }
+    
+            // K-means iterative updates
+            let changed = true;
+            let maxIterations = 10;
+            let iteration = 0;
+    
+            while (changed && iteration < maxIterations) {
+              changed = false;
+              iteration++;
+    
+              // 1) Assign each point to the closest centroid
+              for (let i = 0; i < points.length; i++) {
+                let minDist = Infinity;
+                let minIndex = 0;
+                for (let c = 0; c < centroids.length; c++) {
+                  const dist = colorDistance(points[i], centroids[c]);
+                  if (dist < minDist) {
+                    minDist = dist;
+                    minIndex = c;
+                  }
+                }
+                if (clusterAssignments[i] !== minIndex) {
+                  clusterAssignments[i] = minIndex;
+                  changed = true;
+                }
+              }
+    
+              // 2) Recompute centroids by averaging assigned points
+              let sum = new Array(k).fill(null).map(() => ({r: 0, g: 0, b: 0, count: 0}));
+              for (let i = 0; i < points.length; i++) {
+                const cIdx = clusterAssignments[i];
+                sum[cIdx].r += points[i].r;
+                sum[cIdx].g += points[i].g;
+                sum[cIdx].b += points[i].b;
+                sum[cIdx].count++;
+              }
+              for (let c = 0; c < k; c++) {
+                if (sum[c].count > 0) {
+                  centroids[c].r = sum[c].r / sum[c].count;
+                  centroids[c].g = sum[c].g / sum[c].count;
+                  centroids[c].b = sum[c].b / sum[c].count;
+                }
+              }
+            }
+    
+            // After K-means converges or max iterations reached:
+            // Replace each point's color with its centroid's color
+            for (let i = 0; i < points.length; i++) {
+              const cIdx = clusterAssignments[i];
+              data[4*i]   = centroids[cIdx].r;
+              data[4*i+1] = centroids[cIdx].g;
+              data[4*i+2] = centroids[cIdx].b;
+              // data[4*i+3] = 255 (alpha remains the same, or set to 255)
+            }
+    
+            // Put the updated data back to the canvas
+            kCtx.putImageData(imageData, 0, 0);
+          }
+        }
+    </script>
 </body>
 </html>
