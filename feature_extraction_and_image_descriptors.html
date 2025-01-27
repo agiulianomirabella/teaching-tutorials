@@ -425,11 +425,333 @@ disp(counts');
             <li><a href="https://www.kaggle.com/datasets">Kaggle - Image Processing Datasets</a> – Practice real-world feature extraction and classification tasks on open datasets.</li>
             <li><em>Digital Image Processing</em> by Gonzalez & Woods – A classic textbook that covers foundational feature extraction theories and algorithms.</li>
         </ul>
+        
+        <!-- 8. INTERACTIVE DEMOS -->
+        <h2>Interactive Demos</h2>
+
+        <!-- 1) LBP DEMO TOGGLE -->
+        <div class="demo-toggle" onclick="toggleDemo('demo-lbp')">
+          <strong>Local Binary Patterns (LBP)</strong>
+        </div>
+        <div id="demo-lbp" class="demo-content">
+          <p>
+            Local Binary Patterns (LBP) is a simple yet efficient texture descriptor. 
+            For each pixel, it looks at the 3×3 neighborhood, compares each neighbor's intensity to the center pixel, and forms an 8-bit binary code. 
+            We then convert that code to a decimal value, which can be visualized (often used for texture analysis).
+          </p>
+    
+          <!-- Controls for LBP Demo -->
+          <div class="slider-group">
+            <input type="checkbox" id="applyLBP" checked>
+            <label for="applyLBP">Apply LBP</label>
+          </div>
+          <div class="slider-group">
+            <label for="lbpRadius">Neighborhood Radius:</label>
+            <input type="range" id="lbpRadius" min="1" max="3" value="1" step="1">
+            <span id="lbpRadiusValue">1</span>
+            <br><small>(We keep it small for simplicity; typical LBP uses a 3×3 or 3×3 ring.)</small>
+          </div>
+          <canvas id="canvasLBP"></canvas>
+    
+          <div class="explanation">
+            <strong>How it works:</strong><br>
+            For each pixel (x, y), we collect the intensities of its neighbors in a circular or square neighborhood (here, a 3×3 block for radius=1). 
+            Each neighbor that is >= the center pixel is assigned a bit value of 1; otherwise, 0. 
+            These bits form an 8-bit number, which we map to a grayscale value to display the LBP pattern.
+          </div>
+        </div>
+    
+        <!-- 2) COLOR HISTOGRAM DEMO TOGGLE -->
+        <div class="demo-toggle" onclick="toggleDemo('demo-hist')">
+          <strong>Color Histogram</strong>
+        </div>
+        <div id="demo-hist" class="demo-content">
+          <p>
+            A color histogram is one of the simplest global descriptors. It counts how often each color value appears. 
+            Below, we compute a histogram for each channel (Red, Green, Blue) and display it as a simple bar chart.
+          </p>
+    
+          <!-- Controls for histogram Demo -->
+          <div class="slider-group">
+            <label for="histBins">Number of bins:</label>
+            <input type="range" id="histBins" min="4" max="64" value="16" step="4">
+            <span id="histBinsValue">16</span>
+            <br><small>(Adjust to see more/less resolution in the histogram)</small>
+          </div>
+    
+          <!-- We'll display the original image + the histogram chart side by side or stacked -->
+          <canvas id="canvasHistImage"></canvas>
+          <canvas id="canvasHistogram" width="300" height="200"></canvas>
+    
+          <div class="explanation">
+            <strong>How it works:</strong><br>
+            We read the pixel values from the original image. For each channel (R, G, B), we increment the appropriate bin index based on the pixel’s intensity. 
+            Then we normalize the counts and draw a bar chart for each channel in a different color.
+          </div>
+        </div>
+    
+        <!-- Source image for demos (hidden) -->
+        <img id="sourceImage" src="image1.jpeg" alt="Demo Image" style="display:none;">
     </div>
 
     <footer>
-        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agmirabella">GitHub</a></p>
+        <p>&copy; 2025 A. Giuliano Mirabella | <a href="https://github.com/agiulianomirabella">GitHub</a></p>
     </footer>
     <script src="script.js"></script>
+    <script>
+        /************************************************************************
+         * 1) GENERAL SETUP: LOADING THE IMAGE & TOGGLE
+         ************************************************************************/
+        const sourceImg = document.getElementById('sourceImage');
+        
+        // Wait until the image is fully loaded before initializing
+        sourceImg.onload = function() {
+          initLBPDemo();
+          initColorHistDemo();
+        };
+    
+        // Simple toggle function to expand/collapse each demo content
+        function toggleDemo(id) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+    
+        /************************************************************************
+         * 2) LBP DEMO
+         ************************************************************************/
+        function initLBPDemo() {
+          const applyLBPCheckbox = document.getElementById('applyLBP');
+          const lbpRadiusSlider  = document.getElementById('lbpRadius');
+          const lbpRadiusValue   = document.getElementById('lbpRadiusValue');
+          const canvasLBP        = document.getElementById('canvasLBP');
+          const ctxLBP           = canvasLBP.getContext('2d');
+    
+          // Match canvas size to the source image
+          canvasLBP.width  = sourceImg.width;
+          canvasLBP.height = sourceImg.height;
+    
+          // Draw the source image first
+          ctxLBP.drawImage(sourceImg, 0, 0);
+          let originalImageData = ctxLBP.getImageData(0, 0, canvasLBP.width, canvasLBP.height);
+    
+          // Listen for changes
+          applyLBPCheckbox.addEventListener('change', updateLBP);
+          lbpRadiusSlider.addEventListener('input', () => {
+            lbpRadiusValue.textContent = lbpRadiusSlider.value;
+            updateLBP();
+          });
+    
+          // Initial render
+          updateLBP();
+    
+          // This function re-applies the LBP (or shows original) whenever a control changes
+          function updateLBP() {
+            // Start from the original image each time
+            ctxLBP.putImageData(originalImageData, 0, 0);
+            
+            if (!applyLBPCheckbox.checked) {
+              return; // if LBP not checked, just display original
+            }
+    
+            let radius = parseInt(lbpRadiusSlider.value, 10);
+    
+            // We'll read the pixels from the original for processing
+            const width  = canvasLBP.width;
+            const height = canvasLBP.height;
+            let srcData  = originalImageData.data; // RGBA array
+            // Create a new ImageData for the LBP result
+            let outputData = ctxLBP.createImageData(width, height);
+            
+            // Helper to get pixel intensity (grayscale) from RGBA
+            function getGrayValue(x, y) {
+              let idx = (y * width + x) * 4;
+              let r = srcData[idx], g = srcData[idx+1], b = srcData[idx+2];
+              // Simple average or luminosity formula
+              return 0.299*r + 0.587*g + 0.114*b;
+            }
+    
+            // For each pixel, compute LBP
+            for (let y = radius; y < height - radius; y++) {
+              for (let x = radius; x < width - radius; x++) {
+                let centerVal = getGrayValue(x, y);
+                let lbpCode = 0;
+                /*
+                  Typically, for radius=1, we sample the immediate 8 neighbors in a 3x3 block:
+                    (x-1, y-1) (x, y-1) (x+1, y-1)
+                    (x-1, y)   (x, y)   (x+1, y)
+                    (x-1, y+1) (x, y+1) (x+1, y+1)
+                  We'll assign bits in a clockwise or anticlockwise order. 
+                */
+    
+                // Example: top-left neighbor
+                let neighborVal0 = getGrayValue(x - radius, y - radius);
+                lbpCode |= (neighborVal0 >= centerVal ? 1 : 0) << 7;
+    
+                // top neighbor
+                let neighborVal1 = getGrayValue(x, y - radius);
+                lbpCode |= (neighborVal1 >= centerVal ? 1 : 0) << 6;
+    
+                // top-right neighbor
+                let neighborVal2 = getGrayValue(x + radius, y - radius);
+                lbpCode |= (neighborVal2 >= centerVal ? 1 : 0) << 5;
+    
+                // right neighbor
+                let neighborVal3 = getGrayValue(x + radius, y);
+                lbpCode |= (neighborVal3 >= centerVal ? 1 : 0) << 4;
+    
+                // bottom-right neighbor
+                let neighborVal4 = getGrayValue(x + radius, y + radius);
+                lbpCode |= (neighborVal4 >= centerVal ? 1 : 0) << 3;
+    
+                // bottom neighbor
+                let neighborVal5 = getGrayValue(x, y + radius);
+                lbpCode |= (neighborVal5 >= centerVal ? 1 : 0) << 2;
+    
+                // bottom-left neighbor
+                let neighborVal6 = getGrayValue(x - radius, y + radius);
+                lbpCode |= (neighborVal6 >= centerVal ? 1 : 0) << 1;
+    
+                // left neighbor
+                let neighborVal7 = getGrayValue(x - radius, y);
+                lbpCode |= (neighborVal7 >= centerVal ? 1 : 0) << 0;
+    
+                // The lbpCode is between 0 and 255 (8-bit)
+                // We can just map that directly to a grayscale intensity for display
+                let idx = (y * width + x) * 4;
+                outputData.data[idx+0] = lbpCode; // R
+                outputData.data[idx+1] = lbpCode; // G
+                outputData.data[idx+2] = lbpCode; // B
+                outputData.data[idx+3] = 255;     // A (fully opaque)
+              }
+            }
+    
+            // Put the LBP image back to the canvas
+            ctxLBP.putImageData(outputData, 0, 0);
+          }
+        }
+    
+        /************************************************************************
+         * 3) COLOR HISTOGRAM DEMO
+         ************************************************************************/
+        function initColorHistDemo() {
+          const canvasImage = document.getElementById('canvasHistImage');
+          const ctxImage    = canvasImage.getContext('2d');
+    
+          const canvasHist  = document.getElementById('canvasHistogram');
+          const ctxHist     = canvasHist.getContext('2d');
+    
+          const histBinsSlider = document.getElementById('histBins');
+          const histBinsValue  = document.getElementById('histBinsValue');
+    
+          // Match the image canvas size to source
+          canvasImage.width  = sourceImg.width;
+          canvasImage.height = sourceImg.height;
+          // Draw the original
+          ctxImage.drawImage(sourceImg, 0, 0);
+    
+          // Listen for slider changes
+          histBinsSlider.addEventListener('input', () => {
+            histBinsValue.textContent = histBinsSlider.value;
+            updateHistogram();
+          });
+    
+          // Initial
+          histBinsValue.textContent = histBinsSlider.value;
+          updateHistogram();
+    
+          function updateHistogram() {
+            const bins = parseInt(histBinsSlider.value, 10);
+    
+            // Clear the histogram canvas
+            ctxHist.clearRect(0, 0, canvasHist.width, canvasHist.height);
+    
+            // Get the pixel data from the displayed image
+            let imgData = ctxImage.getImageData(0, 0, canvasImage.width, canvasImage.height);
+            let data = imgData.data; // RGBA array
+    
+            // We'll create arrays for R, G, B channels
+            let histR = new Array(bins).fill(0);
+            let histG = new Array(bins).fill(0);
+            let histB = new Array(bins).fill(0);
+    
+            // Helper to figure out bin index for a pixel value
+            //   pixel_value is in [0, 255], we have 'bins' bins
+            //   bin_index = floor( (pixel_value / 256) * bins )
+            function getBinIndex(value) {
+              // clamp to [0,255] just in case
+              value = Math.max(0, Math.min(255, value));
+              return Math.floor((value / 256) * bins);
+            }
+    
+            // Fill in the hist arrays
+            for (let i = 0; i < data.length; i += 4) {
+              let r = data[i + 0];
+              let g = data[i + 1];
+              let b = data[i + 2];
+              histR[getBinIndex(r)]++;
+              histG[getBinIndex(g)]++;
+              histB[getBinIndex(b)]++;
+            }
+    
+            // Normalize so we can draw them with a consistent scale
+            let maxCount = Math.max(
+              ...histR, 
+              ...histG, 
+              ...histB
+            );
+    
+            // We want to draw side-by-side bars for R, G, B in each bin
+            // We'll do a simple approach: each bin is subdivided into three narrower columns
+            const barWidth  = (canvasHist.width - 20) / bins;      // total space for each bin
+            const halfHeight = canvasHist.height - 20;             // some margin
+            const offsetX   = 10;  // left margin
+            const offsetY   = canvasHist.height - 10; // bottom margin
+    
+            // Draw axes or bounding box
+            ctxHist.strokeStyle = '#000';
+            ctxHist.strokeRect(0.5, 0.5, canvasHist.width - 1, canvasHist.height - 1);
+    
+            for (let i = 0; i < bins; i++) {
+              // Normalized heights (0 -> 1) 
+              let rFrac = histR[i] / maxCount;
+              let gFrac = histG[i] / maxCount;
+              let bFrac = histB[i] / maxCount;
+    
+              let subBarWidth = barWidth / 3.0;
+    
+              // R bar
+              let rHeight = rFrac * halfHeight;
+              ctxHist.fillStyle = 'red';
+              ctxHist.fillRect(
+                offsetX + i*barWidth, 
+                offsetY - rHeight, 
+                subBarWidth, 
+                rHeight
+              );
+    
+              // G bar
+              let gHeight = gFrac * halfHeight;
+              ctxHist.fillStyle = 'green';
+              ctxHist.fillRect(
+                offsetX + i*barWidth + subBarWidth, 
+                offsetY - gHeight, 
+                subBarWidth, 
+                gHeight
+              );
+    
+              // B bar
+              let bHeight = bFrac * halfHeight;
+              ctxHist.fillStyle = 'blue';
+              ctxHist.fillRect(
+                offsetX + i*barWidth + 2*subBarWidth, 
+                offsetY - bHeight, 
+                subBarWidth, 
+                bHeight
+              );
+            }
+          }
+        }
+  </script>
 </body>
 </html>
