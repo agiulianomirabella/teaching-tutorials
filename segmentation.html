@@ -637,115 +637,134 @@ segmented_image = reshape(idx, size(image));
           const kCtx = kCanvas.getContext('2d');
           kCanvas.width = sourceImg.width;
           kCanvas.height = sourceImg.height;
-    
-          // Draw the source image
+        
+          // 1) Draw the source image once
           kCtx.drawImage(sourceImg, 0, 0, kCanvas.width, kCanvas.height);
-    
+        
+          // 2) Grab the original image data and store it
+          const originalImgData = kCtx.getImageData(0, 0, kCanvas.width, kCanvas.height);
+        
+          // Slider input
           const kSlider = document.getElementById('kValue');
           const kLabel = document.getElementById('kValueLabel');
-    
+        
+          // Listen for slider changes
           kSlider.addEventListener('input', () => {
             kLabel.textContent = kSlider.value;
             applyKmeans(parseInt(kSlider.value, 10));
           });
-    
-          // Initialize with default k
+        
+          // Run once at the default k
           applyKmeans(parseInt(kSlider.value, 10));
-    
+        
           function applyKmeans(k) {
-            // Get the current image data
-            const imageData = kCtx.getImageData(0, 0, kCanvas.width, kCanvas.height);
-            const data = imageData.data; // [r, g, b, a, ...]
-    
-            // Convert pixel data into an array of {r, g, b}
+            // Always restore the original image first
+            kCtx.putImageData(originalImgData, 0, 0);
+        
+            // Now get the fresh (non-segmented) data for clustering
+            let imageData = kCtx.getImageData(0, 0, kCanvas.width, kCanvas.height);
+            let data = imageData.data; // [r, g, b, a, ...]
+        
+            // Build an array of color points
             let points = [];
             for (let i = 0; i < data.length; i += 4) {
-              points.push({
-                r: data[i],
-                g: data[i+1],
-                b: data[i+2]
-              });
+              points.push({r: data[i], g: data[i+1], b: data[i+2]});
             }
-    
-            // K-means initialization: pick random centroids
+        
+            // 3) Perform K-means from scratch using these points
+            // (Re-randomizing centroids, re-assigning points, etc.)
+            let clusterAssignments = runKmeans(points, k);
+        
+            // 4) Update the canvas data based on the final cluster assignments
+            for (let i = 0; i < points.length; i++) {
+              const cIdx = clusterAssignments[i].cluster;
+              data[4*i]   = cIdx.r; // replace with centroid color
+              data[4*i+1] = cIdx.g;
+              data[4*i+2] = cIdx.b;
+              // alpha remains the same or set to 255
+            }
+        
+            // 5) Draw the updated result to the canvas
+            kCtx.putImageData(imageData, 0, 0);
+          }
+        
+          // Example k-means function returning an array { cluster: {r, g, b} } per pixel
+          function runKmeans(points, k) {
+            // Initialize centroids randomly
+            let centroids = initializeCentroids(points, k);
+            let assignments = new Array(points.length);
+        
+            let changed = true;
+            let maxIter = 10;
+            let iter = 0;
+        
+            while (changed && iter < maxIter) {
+              changed = false;
+              iter++;
+        
+              // 1) Assign each point to the closest centroid
+              for (let i = 0; i < points.length; i++) {
+                let bestDist = Infinity;
+                let bestC = 0;
+                for (let c = 0; c < centroids.length; c++) {
+                  let dist = colorDistance(points[i], centroids[c]);
+                  if (dist < bestDist) {
+                    bestDist = dist;
+                    bestC = c;
+                  }
+                }
+                if (!assignments[i] || assignments[i].centroidIndex !== bestC) {
+                  assignments[i] = { centroidIndex: bestC };
+                  changed = true;
+                }
+              }
+        
+              // 2) Recompute centroids
+              let sums = new Array(k).fill(null).map(() => ({r:0,g:0,b:0,count:0}));
+              for (let i = 0; i < points.length; i++) {
+                let cIdx = assignments[i].centroidIndex;
+                sums[cIdx].r += points[i].r;
+                sums[cIdx].g += points[i].g;
+                sums[cIdx].b += points[i].b;
+                sums[cIdx].count++;
+              }
+              for (let c = 0; c < k; c++) {
+                if (sums[c].count > 0) {
+                  centroids[c].r = sums[c].r / sums[c].count;
+                  centroids[c].g = sums[c].g / sums[c].count;
+                  centroids[c].b = sums[c].b / sums[c].count;
+                }
+              }
+            }
+        
+            // Return final cluster color for each pixel
+            return assignments.map(a => ({
+              cluster: {
+                r: centroids[a.centroidIndex].r,
+                g: centroids[a.centroidIndex].g,
+                b: centroids[a.centroidIndex].b
+              }
+            }));
+          }
+        
+          function initializeCentroids(points, k) {
             let centroids = [];
             for (let c = 0; c < k; c++) {
-              // random pick from points
-              const randIdx = Math.floor(Math.random() * points.length);
+              let randIdx = Math.floor(Math.random() * points.length);
               centroids.push({
                 r: points[randIdx].r,
                 g: points[randIdx].g,
                 b: points[randIdx].b
               });
             }
-    
-            // We'll store the cluster assignment for each point
-            let clusterAssignments = new Array(points.length).fill(0);
-    
-            // Function to find distance between a point and centroid
-            function colorDistance(p, c) {
-              const dr = p.r - c.r;
-              const dg = p.g - c.g;
-              const db = p.b - c.b;
-              return dr*dr + dg*dg + db*db;
-            }
-    
-            // K-means iterative updates
-            let changed = true;
-            let maxIterations = 10;
-            let iteration = 0;
-    
-            while (changed && iteration < maxIterations) {
-              changed = false;
-              iteration++;
-    
-              // 1) Assign each point to the closest centroid
-              for (let i = 0; i < points.length; i++) {
-                let minDist = Infinity;
-                let minIndex = 0;
-                for (let c = 0; c < centroids.length; c++) {
-                  const dist = colorDistance(points[i], centroids[c]);
-                  if (dist < minDist) {
-                    minDist = dist;
-                    minIndex = c;
-                  }
-                }
-                if (clusterAssignments[i] !== minIndex) {
-                  clusterAssignments[i] = minIndex;
-                  changed = true;
-                }
-              }
-    
-              // 2) Recompute centroids by averaging assigned points
-              let sum = new Array(k).fill(null).map(() => ({r: 0, g: 0, b: 0, count: 0}));
-              for (let i = 0; i < points.length; i++) {
-                const cIdx = clusterAssignments[i];
-                sum[cIdx].r += points[i].r;
-                sum[cIdx].g += points[i].g;
-                sum[cIdx].b += points[i].b;
-                sum[cIdx].count++;
-              }
-              for (let c = 0; c < k; c++) {
-                if (sum[c].count > 0) {
-                  centroids[c].r = sum[c].r / sum[c].count;
-                  centroids[c].g = sum[c].g / sum[c].count;
-                  centroids[c].b = sum[c].b / sum[c].count;
-                }
-              }
-            }
-    
-            // After K-means converges or max iterations reached:
-            // Replace each point's color with its centroid's color
-            for (let i = 0; i < points.length; i++) {
-              const cIdx = clusterAssignments[i];
-              data[4*i]   = centroids[cIdx].r;
-              data[4*i+1] = centroids[cIdx].g;
-              data[4*i+2] = centroids[cIdx].b;
-              // data[4*i+3] = 255 (alpha remains the same, or set to 255)
-            }
-    
-            // Put the updated data back to the canvas
-            kCtx.putImageData(imageData, 0, 0);
+            return centroids;
+          }
+        
+          function colorDistance(a, b) {
+            const dr = a.r - b.r;
+            const dg = a.g - b.g;
+            const db = a.b - b.b;
+            return dr*dr + dg*dg + db*db;
           }
         }
     </script>
