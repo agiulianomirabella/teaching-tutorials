@@ -450,13 +450,6 @@ segmented_image = reshape(idx, size(image));
           initKmeansDemo();
         };
     
-        // Helper function to toggle the .demo-content visibility
-        function toggleDemo(id) {
-          const el = document.getElementById(id);
-          if (!el) return;
-          el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-        }
-    
         /**************************************************************
          * 2) THRESHOLD SEGMENTATION DEMO
          *    - We convert each pixel to grayscale.
