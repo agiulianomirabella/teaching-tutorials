@@ -441,7 +441,11 @@ imwrite(closed, 'closed.jpg');
           initEdgeDemo();
           initMorphDemo();
         };
-    
+
+        if (sourceImg.complete) {
+          sourceImg.onload();
+        }
+
         // Helper to toggle the "demo-content" visibility
         function toggleDemo(id) {
           const el = document.getElementById(id);
