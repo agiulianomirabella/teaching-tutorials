@@ -393,7 +393,11 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
         imgGeom.src = "image1.jpeg";
     
         imgGeom.onload = () => drawGeometric();
-    
+        
+        if (imgGeom.complete) {
+          drawGeometric();
+        }
+
         // Attach events
         [rotationInput, scaleInput, translateXInput, translateYInput].forEach(input => {
           input.addEventListener("input", drawGeometric);
@@ -457,6 +461,13 @@ subplot(1,2,2); imshow(rotated_image); title('Rotated Image');
           canvasInt.height = imgInt.height;
           drawIntensity();
         };
+
+        if (imgInt.complete) {
+          canvasInt.width = imgInt.width;
+          canvasInt.height = imgInt.height;
+          drawIntensity();
+        }
+
     
         [brightnessInput, contrastInput, thresholdInput, applyThresholdCheckbox].forEach(el => {
           el.addEventListener("input", drawIntensity);
