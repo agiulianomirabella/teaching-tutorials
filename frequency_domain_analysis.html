@@ -572,6 +572,10 @@ axis off;
         applyFrequencyFilter();
       };
 
+      if (freqImg.complete) {
+          freqImg.onload();
+      }
+        
       freqImg.onerror = function() {
         console.error("Error loading image. Check the path and network.");
       };
