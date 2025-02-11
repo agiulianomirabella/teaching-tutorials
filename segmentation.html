@@ -451,7 +451,11 @@ segmented_image = reshape(idx, size(image));
           initRegionGrowingDemo();
           initKmeansDemo();
         };
-    
+
+        if (sourceImg.complete) {
+          sourceImg.onload();
+        }
+
         /**************************************************************
          * 2) THRESHOLD SEGMENTATION DEMO
          *    - We convert each pixel to grayscale.
