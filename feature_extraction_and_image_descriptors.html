@@ -509,7 +509,11 @@ disp(counts');
           initLBPDemo();
           initColorHistDemo();
         };
-    
+
+        if (sourceImg.complete) {
+          sourceImg.onload();
+        }
+
         // Simple toggle function to expand/collapse each demo content
         function toggleDemo(id) {
           const el = document.getElementById(id);
