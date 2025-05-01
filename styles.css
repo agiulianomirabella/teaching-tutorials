@@ -1,20 +1,31 @@
+:root {
+    --black: #191919;
+    --blue: #1C3144;
+    --gray: #CED0CE;
+    --orange: #FF6700;
+    --white: #FFFFFF;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Times New Roman';
     line-height: 1.6;
     margin: 0;
     padding: 20px;
-    background-color: #f4f4f4;
-    color: #333;
+    padding-top: 40px;
+    background-color: var(--gray);
+    color: var(--blue);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-header {
+
+/* header {
     background: #D7DBDD;
     padding: 20px;
     text-align: center;
     border-radius: 10px;
-}
-h1, h2 {
-    color: #005792;
-}
+} */
+
 .container {
     max-width: 900px;
     margin: 0 auto;
@@ -23,36 +34,44 @@ h1, h2 {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
 a {
-    color: #005792;
+    color: var(--blue);
     text-decoration: none;
 }
+
 a:hover {
     text-decoration: underline;
 }
+
 footer {
     margin-top: 20px;
     text-align: center;
     font-size: 0.9em;
-    color: #555;
+    color: var(--white);
+    background-color: var(--blue);
 }
+
 .code-tabs {
     display: flex;
     margin-bottom: 10px;
 }
+
 .code-tab {
     cursor: pointer;
     padding: 10px 20px;
-    background: #D7DBDD;
+    background: var(--gray);
     border: 1px solid #ccc;
     border-radius: 5px 5px 0 0;
     margin-right: 5px;
     font-weight: bold;
 }
+
 .code-tab.active {
-    background: #005792;
-    color: #fff;
+    background: var(--orange);
+    color: var(--blue);
 }
+
 .code-block {
     display: none;
     background: #f4f4f4;
@@ -62,9 +81,11 @@ footer {
     font-family: monospace;
     overflow-x: auto;
 }
+
 .code-block.active {
     display: block;
 }
+
 pre {
     background-color: #f4f4f4;
     padding: 10px;
@@ -80,6 +101,7 @@ pre {
     margin: 10px 0;
     border: 1px solid #ccc;
 }
+
 .demo-content {
     display: none;
     border: 1px solid #ccc;
@@ -101,4 +123,118 @@ canvas {
 .slider-group,
 .demo-content label {
     margin: 10px auto;
+}
+
+.heading {
+    display: block;              /* full-width block */
+    width: 100%;                 /* fill the container’s content box */
+    box-sizing: border-box;      /* include its own padding in that 100% */
+    margin: 0 0 2rem 0;          /* adjust bottom spacing as you like */
+    padding: 1rem;               /* your existing padding */
+    background-color: var(--blue);
+    color: var(--white);
+    border-radius: 8px;
+    text-align: center;          /* center the <h1> and <p> inside */
+}
+
+/* override your global p rule inside the heading */
+.heading p {
+    text-align: center;
+    margin: 0;                /* tighten up spacing if you like */
+}
+
+/* .blog-post {
+    max-width: 700px;
+    margin: 0 auto;
+    background: var(--white);
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+} */
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+h2 {
+    color: var(--blue);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    border-bottom: 2px solid var(--gray);
+    padding-bottom: 8px;
+}
+
+p, li {
+    font-size: 1em;
+    margin-bottom: 16px;
+    text-align: justify;
+}
+
+ol {
+    padding-left: 20px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 8px;
+}
+
+strong {
+    color: var(--black);
+}
+
+/* .inline-img-left {
+    float: left;
+    width: 40%;
+    margin-right: 1em;
+}
+
+.inline-img-right {
+    float: right;
+    width: 40%;
+    margin-left: 1em;
+} */
+
+/* section::after {
+    content: "";
+    display: block;
+    clear: both;
+} */
+
+hr {
+    border: none;
+    border-top: 1px solid var(--orange);
+    margin: 2em 0;
+}
+
+.footer {
+    width: 100%;
+    background-color: var(--blue);
+    color: var(--white);
+    padding: 1rem;
+    margin-top: 2rem;
+    box-sizing: border-box;
+    text-align: center;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.footer p {
+    text-align: center;
+    margin: 0;
+}
+
+.footer a,
+.footer-link {
+  color: var(--orange);
+  text-decoration: underline;
+}
+
+.footer a:hover {
+  color: var(--white);
 }
